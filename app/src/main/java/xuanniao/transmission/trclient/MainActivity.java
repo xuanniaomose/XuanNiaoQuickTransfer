@@ -20,12 +20,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static xuanniao.transmission.trclient.Connect.socket;
-
 public class MainActivity extends AppCompatActivity {
 
     public static Handler handler_recv_msg;
-    public static Handler handler_connect_msg;
+    public static Handler handler_check;
     public String receiveMsg;
     public String send_text;
     public EditText inputText;
@@ -56,19 +54,24 @@ public class MainActivity extends AppCompatActivity {
         // 获取网络权限
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
-        // 启动连接
+        // 启动连接服务
         Connect Connect = new Connect();
         Log.i("连接", "开始");
         Connect.connect();
-
+        // 启动连接检查服务
+        Log.i("连接检查服务", "开启");
+        Intent intent_Check = new Intent(this, CheckConnect.class);
+        intent_Check.putExtra("CheckConnect", 2);
+        CheckConnect.enqueueWork(MainActivity.this, intent_Check);
+        Log.i("MAIN", "启动连接检查服务");
         // 设置网络状态提示
         textview_state0 = findViewById(R.id.textview_state0);
-        Socket socket = xuanniao.transmission.trclient.Connect.socket;
-        handler_connect_msg = new Handler() {
+        Socket socket = Connect.socket;
+        handler_check = new Handler() {
             @Override
             public void handleMessage(Message message) {
                 super.handleMessage(message);
-                if (message.what == 0) {
+                if (message.obj == "true") {
                     textview_state0.setText("连接");
                     textview_state0.setTextColor(0xff008000);
                     Log.i("网络状态","连接");
@@ -81,13 +84,12 @@ public class MainActivity extends AppCompatActivity {
         };
 
         // 启动接收服务
-        if (socket != null) {
-            Log.i("接收服务", "开启");
-            Intent intent_Receive = new Intent(this, Receive.class);
-            intent_Receive.putExtra("Receive", 10111);
-            Receive.enqueueWork(MainActivity.this, intent_Receive);
-            Log.i("MAIN", "启动接收服务");
-        }
+        Log.i("接收服务", "开启");
+        Intent intent_Receive = new Intent(this, Receive.class);
+        intent_Receive.putExtra("Receive", 1);
+        Receive.enqueueWork(MainActivity.this, intent_Receive);
+        Log.i("MAIN", "启动接收服务");
+
 
         handler_recv_msg = new Handler() {
             @Override

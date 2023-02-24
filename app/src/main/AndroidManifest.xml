@@ -23,6 +23,15 @@
             </intent-filter>
         </service>
 
+        <service
+                android:name="xuanniao.transmission.trclient.CheckConnect"
+                android:exported="true"
+                android:permission="android.permission.BIND_JOB_SERVICE">
+            <intent-filter >
+                <action android:name="TrCheck"/>
+            </intent-filter>
+        </service>
+
         <activity
                 android:name=".MainActivity"
                 android:exported="true">

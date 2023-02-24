@@ -33,7 +33,6 @@ public class Connect extends Application {
     private final List<Socket> mList = new ArrayList<Socket>();
 
 
-
     public void connect() {
         mExecutorService.execute(new connectService());
     }
@@ -45,6 +44,7 @@ public class Connect extends Application {
     public void send(String send_text) {
         mExecutorService.execute(new sendService(send_text));
     }
+
 
     private class connectService implements Runnable {
         @Override

@@ -152,7 +152,7 @@ class Ui_XuanNiaoTR(object):
         self.ChartBrowser.append('等待手机接入...\n')
         self.client, self.addr = self.s.accept()
         self.ChartBrowser.append(time.strftime('%H:%M:%S') + ' 连接手机IP为'
-                                 + str(self.addr[0]) + '手机端口' + str(self.addr[1]) + '\n')
+                                 + str(self.addr[0]) + '手机端口' + str(self.addr[1]) + '\n\n')
         try:
             self.receiving()
         except Exception as e:

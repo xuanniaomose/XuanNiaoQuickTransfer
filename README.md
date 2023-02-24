@@ -1,4 +1,4 @@
-# XuanNiaoQuickTransfer
+# 玄鸟快传XuanNiaoQuickTransfer
 一个个人练习作品，我觉得它应该有一些实用性——起码对我个人和朋友来说
 所以我将不断完善直到我们能够方便的实用它 
 这将是一个在安卓设备和WIN电脑设备之间通过Socket实现轻量化快速传输字符串和文件的双端程序，

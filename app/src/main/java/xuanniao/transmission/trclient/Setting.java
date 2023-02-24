@@ -25,8 +25,6 @@ import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static android.app.PendingIntent.getActivity;
-
 public class Setting extends AppCompatActivity {
     private static Socket socket;
     private ExecutorService mExecutorService = null;

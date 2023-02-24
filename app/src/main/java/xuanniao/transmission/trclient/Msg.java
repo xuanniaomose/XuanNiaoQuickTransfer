@@ -1,10 +1,10 @@
 package xuanniao.transmission.trclient;
 
 public class Msg {
-    public static final int TYPE_RECEIVED = 0;
-    public static final int TYPE_SENT = 1;
+    public final int TYPE_RECEIVED = 0;
+    public final int TYPE_SENT = 1;
     private String content;
-    private static int type;
+    private int type;
 
     public Msg(String content, int type) {
         this.content = content;
@@ -15,7 +15,7 @@ public class Msg {
         return content;
     }
 
-    public static int getType() {
+    public int getType() {
         return type;
     }
 }

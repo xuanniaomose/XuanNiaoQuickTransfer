@@ -13,7 +13,7 @@ import java.util.concurrent.Executors;
 
 public class Connect extends Application {
     // Socket变量
-    private static Socket socket = null;
+    public static Socket socket = null;
 
     // 输入流对象
     InputStream inputStream;

@@ -15,10 +15,10 @@ import android.widget.*;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
-
-import static xuanniao.transmission.trclient.Msg.TYPE_RECEIVED;
+import java.util.stream.Collectors;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -26,11 +26,11 @@ public class MainActivity extends AppCompatActivity {
     public String receiveMsg;
     public String send_text;
     public EditText inputText;
-    public static MsgAdapter msg_adapter;
+    public static MsgAdapter msg_adapter = new MsgAdapter();
+    public static List<Msg> msgList;
     private Button button_send;
     private TextView textview_state0;
     private RecyclerView msgRecyclerView;
-    private List<Msg> msgList;
 
 
     @SuppressLint({"CutPasteId", "WrongViewCast", "HandlerLeak"})
@@ -39,6 +39,16 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setCustomActionBar();
+
+
+        msgRecyclerView = findViewById(R.id.recyclerView);
+        // 定义一个线性布局管理器
+        LinearLayoutManager manager = new LinearLayoutManager(this);
+        // 设置布局管理器
+        msgRecyclerView.setLayoutManager(manager);
+        // 设置adapter
+        msgRecyclerView.setAdapter(msg_adapter);
+        msgList = new ArrayList<>();
         initRecyclerView();
 
         // 获取网络权限
@@ -58,21 +68,23 @@ public class MainActivity extends AppCompatActivity {
             public void handleMessage(Message message) {
                 super.handleMessage(message);
                 if (message.what == 0) {
-                    Log.i("消息列表长度", String.valueOf(msgList.size()));
                     // 把新消息添加进msgList
-                    msgList.add(new Msg((String) message.obj, TYPE_RECEIVED));
-                    msg_adapter.notifyItemInserted(msgList.size()-1);
+                    msgList.add(msgList.size(), new Msg((String) message.obj, message.what));
+                    List<String> content_List2 = msgList.stream().map(Msg::getContent).collect(Collectors.toList());
+                    List<Integer> type_List2 = msgList.stream().map(Msg::getType).collect(Collectors.toList());
+                    Log.i("MainSR消息列表2", content_List2.toString());
+                    Log.i("MainSR类型列表2", type_List2.toString());
                     // msg_adapter通过局部更新方法添加尾项
-                    msg_adapter.notifyItemChanged(msgList.size()-1);
+                    msg_adapter.notifyItemInserted(msg_adapter.getItemCount()-1);
                     // msgRecyclerView跳转到尾项
-                    msgRecyclerView.scrollToPosition(msgList.size()-1);
+                    msgRecyclerView.scrollToPosition(msg_adapter.getItemCount()-1);
                 }
             }
         };
 
         // 设置网络状态提示
 //        textview_state0 = findViewById(R.id.textview_state0);
-//        socket = ((Connect)getApplication()).getSocket();
+//        Socket socket = xuanniao.transmission.trclient.Connect.socket;
 //        if (socket == null) {
 //            textview_state0.setText("连接");
 //            textview_state0.setTextColor(0xff008000);
@@ -80,6 +92,7 @@ public class MainActivity extends AppCompatActivity {
 //            textview_state0.setText("断开");
 //            textview_state0.setTextColor(0xffff0000);
 //        }
+
         // 监听输入框
         SharedPreferences setInfo = getSharedPreferences("SetInfo", MODE_PRIVATE);
         SharedPreferences.Editor editor = setInfo.edit();
@@ -105,17 +118,16 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 send_text = inputText.getText().toString();
                 if (!"".equals(send_text)) {
-                    Log.i("消息列表长度", String.valueOf(msgList.size()));
                     Connect Connect = new Connect();
                     Connect.send(send_text);
-                    msgList.add(new Msg(send_text, Msg.TYPE_SENT));         //将输入的消息及其类型添加进消息数据列表中
-                    Log.i("消息列表长度", String.valueOf(msgList.size()));
-                    msg_adapter.notifyItemInserted(msgList.size() + 1);   //为RecyclerView添加末尾子项
-                    Log.i("消息列表长度", String.valueOf(msgList.size()));
-//                      msg_adapter.setMsgList(msgList);
-                    msg_adapter.notifyItemChanged(msgList.size());
-                    msgRecyclerView.scrollToPosition(msgList.size());       //跳转到当前位置
+                    msgList.add(new Msg(send_text, 1));         //将输入的消息及其类型添加进消息数据列表中
+                    msg_adapter.notifyItemInserted(msgList.size()-1);   //为RecyclerView添加末尾子项
+                    msgRecyclerView.scrollToPosition(msgList.size()-1);       //跳转到当前位置
                     inputText.getText().clear();                            //清空输入框文本
+                    List<String> content_List2 = msgList.stream().map(Msg::getContent).collect(Collectors.toList());
+                    List<Integer> type_List2 = msgList.stream().map(Msg::getType).collect(Collectors.toList());
+                    Log.i("MainSR消息列表2", content_List2.toString());
+                    Log.i("MainSR类型列表2", type_List2.toString());
                 }
             }
         });
@@ -123,19 +135,13 @@ public class MainActivity extends AppCompatActivity {
 
     // 初始化RecyclerView
     private void initRecyclerView() {
-        msgRecyclerView = findViewById(R.id.recyclerView);
-        msgList = new ArrayList<>();
-        Msg msg1 = new Msg("欢迎使用玄鸟快传", 0);
+        Log.i("MAIN", "初始化RecyclerView");
+        Msg msg1 = new Msg("欢迎使用玄鸟快传", 1);
         msgList.add(msg1);
-        msg_adapter = new MsgAdapter();
+        Msg msg2 = new Msg("服务器端已连接", 0);
+        msgList.add(msg2);
         msg_adapter.setMsgList(msgList);
-        msg_adapter.notifyDataSetChanged();
-        // 定义一个线性布局管理器
-        LinearLayoutManager manager = new LinearLayoutManager(this);
-        // 设置布局管理器
-        msgRecyclerView.setLayoutManager(manager);
-        // 设置adapter
-        msgRecyclerView.setAdapter(msg_adapter);
+
     }
 
     private void setCustomActionBar() {

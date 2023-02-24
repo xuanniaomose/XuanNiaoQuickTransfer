@@ -8,7 +8,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.core.app.JobIntentService;
 
 public class Receive extends JobIntentService {
@@ -28,8 +27,7 @@ public class Receive extends JobIntentService {
         super.onCreate();
         Log.i(Tag,"创建");
     }
-
-//  不要重写onBind方法，否则会报错
+    //  不要重写onBind方法，否则会报错
 
     @Override
     // 服务功能的设置

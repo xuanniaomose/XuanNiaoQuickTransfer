@@ -6,138 +6,170 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".MainActivity"
-        android:id="@+id/buttom_unload">
+        android:id="@+id/main">
     <LinearLayout
+            android:id="@+id/main_content"
             android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:background="@color/blue_100"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
         <LinearLayout
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1">
+                android:layout_height="wrap_content">
             <LinearLayout
-                    android:orientation="vertical"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1">
-
-                <TextView
-                        android:text="这里显示接收的信息"
-                        android:layout_width="match_parent"
-                        android:layout_height="260dp"
-                        android:id="@+id/textview_recive"/>
-                <TextView
-                        android:text="这里显示发送的信息"
-                        android:layout_width="match_parent"
-                        android:layout_height="304dp"
-                        android:id="@+id/textView_send"/>
-            </LinearLayout>
-            <LinearLayout
-                    android:orientation="vertical"
+                    android:orientation="horizontal"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:id="@+id/linearLayout2">
-                <LinearLayout
-                        android:orientation="vertical"
+                    android:layout_height="wrap_content">
+                <TextView
+                        android:text="电脑端ipv4地址："
+                        android:textColor="@color/grey"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content">
-                    <TextView
-                            android:text="玄鸟快传"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:id="@+id/textview_version"/>
-                    <TextView
-                            android:text="ver0.1"
-                            android:layout_width="40dp"
-                            android:layout_height="wrap_content"
-                            android:id="@+id/textview_blank"
-                            android:layout_weight="1"/>
-                    <Switch
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:id="@+id/switch_connect"
-                            tools:ignore="UseSwitchCompatOrMaterialXml"/>
-                    <TextView
-                            android:text="断开"
-                            android:layout_width="41dp"
-                            android:layout_height="wrap_content"
-                            android:id="@+id/textview_switch"/>
-                    <TextView
-                            android:text="ipv4地址:"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:id="@+id/textview_ipv4"/>
-                    <TextView
-                            android:text="@string/ipv4"
-                            android:layout_width="65dp"
-                            android:layout_height="match_parent"
-                            android:gravity="center"
-                            android:id="@+id/textview_ipv4num"
-                            android:rotation="0"/>
-                </LinearLayout>
-                <LinearLayout
-                        android:orientation="vertical"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="bottom"
-                        android:id="@+id/right_button">
-                    <Button
-                            android:text="文档"
-                            android:layout_width="57dp"
-                            android:layout_height="80dp"
-                            android:id="@+id/button_text"
-                            android:layout_marginStart="5dp"
-                            android:layout_marginEnd="20dp"/>
-                    <Button
-                            android:text="音乐"
-                            android:layout_width="57dp"
-                            android:layout_height="80dp"
-                            android:id="@+id/button_music"
-                            android:layout_marginStart="5dp"
-                            android:layout_marginEnd="20dp"/>
-                    <Button
-                            android:text="视频"
-                            android:layout_width="57dp"
-                            android:layout_height="80dp"
-                            android:id="@+id/button_vedio"
-                            android:layout_marginStart="5dp"
-                            android:layout_marginEnd="20dp"/>
-                    <Button
-                            android:text="图片"
-                            android:layout_width="57dp"
-                            android:layout_height="80dp"
-                            android:id="@+id/button_image"
-                            android:layout_marginStart="5dp"
-                            android:layout_marginEnd="20dp"/>
-                </LinearLayout>
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:id="@+id/textview_ipv4"/>
+                <TextView
+                        android:text="@string/ipv4"
+                        android:textColor="@color/grey"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:id="@+id/textview_ipv4num"/>
+            </LinearLayout>
+
+            <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content">
+            </LinearLayout>
+
+            <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+                <TextView
+                        android:text="电脑端端口:"
+                        android:textColor="@color/grey"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/a_port"/>
+                <TextView
+                        android:text="@string/port"
+                        android:textColor="@color/grey"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/a_port_num"/>
+                <TextView
+                        android:text="未知"
+                        android:textColor="@color/yellow"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/textview_state0"/>
             </LinearLayout>
         </LinearLayout>
-        <LinearLayout
-                android:orientation="horizontal"
+
+        <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerView"
                 android:layout_width="match_parent"
-                android:layout_height="60dp"
-                android:background="@color/purple_200"
-                android:id="@+id/linearLayout_bottom"
-                android:gravity="center_vertical">
-            <EditText
+                android:layout_height="0dp"
+                android:layout_weight="1"/>
+
+        <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/linearlayout_chart">
+
+            <LinearLayout
+                    android:orientation="horizontal"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:id="@+id/edittext_send"
-                    android:background="@color/white"
-                    android:focusable="true"
-                    android:focusableInTouchMode="true"
-                    android:maxLines="2"
-                    android:layout_margin="10dp"
-                    android:layout_weight="1"
-                    tools:ignore="SpeakableTextPresentCheck"/>
-            <Button
-                    android:text="上传"
-                    android:layout_width="80dp"
-                    android:layout_height="50dp"
-                    android:background="@color/purple_700"
-                    android:id="@+id/button_upload"
-                    android:layout_margin="10dp"/>
+                    android:layout_height="55dp"
+                    android:background="@color/blue_200"
+                    android:id="@+id/linearlayout_content"
+                    android:gravity="center_vertical">
+                <EditText
+                        android:id="@+id/edittext_send"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:textSize="16sp"
+                        android:background="@color/blue_100"
+                        android:focusable="true"
+                        android:focusableInTouchMode="true"
+                        android:maxLines="3"
+                        android:layout_marginTop="9dp"
+                        android:layout_marginBottom="9dp"
+                        android:layout_marginStart="15dp"
+                        android:layout_weight="1"
+                        tools:ignore="SpeakableTextPresentCheck"/>
+                <Button
+                        android:text="发送"
+                        android:layout_width="80dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="5dp"
+                        android:layout_marginEnd="15dp"
+                        android:id="@+id/button_send"/>
+            </LinearLayout>
+
+            <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:background="@color/blue_100"
+                    android:id="@+id/bottom_navigation"
+                    android:gravity="center_vertical">
+
+                <TableLayout android:layout_width="match_parent"
+                             android:layout_height="wrap_content"
+                             android:layout_marginStart="3dp"
+                             android:layout_marginEnd="3dp"
+                             android:stretchColumns="*">
+                    <TableRow
+                            android:layout_width="match_parent"
+                            android:layout_height="40dp">
+                        <Button
+                                android:text="文档"
+                                android:layout_width="1dip"
+                                android:layout_height="40dp"
+                                android:layout_marginStart="5dp"
+                                android:layout_marginEnd="2dp"
+                                android:id="@+id/button_text"/>
+                        <Button
+                                android:text="音乐"
+                                android:layout_width="1dip"
+                                android:layout_height="40dp"
+                                android:layout_marginStart="2dp"
+                                android:layout_marginEnd="2dp"
+                                android:id="@+id/button_music"/>
+                        <Button
+                                android:text="视频"
+                                android:layout_width="1dip"
+                                android:layout_height="40dp"
+                                android:layout_marginStart="2dp"
+                                android:layout_marginEnd="2dp"
+                                android:id="@+id/button_video"/>
+                        <Button
+                                android:text="图片"
+                                android:layout_width="1dip"
+                                android:layout_height="40dp"
+                                android:layout_marginStart="2dp"
+                                android:layout_marginEnd="2dp"
+                                android:id="@+id/button_image"/>
+                        <Button
+                                android:text="其他"
+                                android:layout_width="1dip"
+                                android:layout_height="40dp"
+                                android:layout_marginStart="2dp"
+                                android:layout_marginEnd="5dp"
+                                android:id="@+id/button_other"/>
+                    </TableRow>
+                </TableLayout>
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

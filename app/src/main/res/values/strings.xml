@@ -2,5 +2,9 @@
     <string name="app_name">玄鸟快传</string>
     <string name="url">https://www.baidu.com</string>
     <string name="ipv4">192.168.1.16</string>
+    <string name="port">9999</string>
     <string name="upload_text">hello world!</string>
+    <string name="title_activity_Setting">设置</string>
+    <string name="title_activity_Connect">连接</string>
+    <string name="socket"></string>
 </resources>

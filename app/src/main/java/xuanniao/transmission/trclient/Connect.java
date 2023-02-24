@@ -46,10 +46,6 @@ public class Connect extends Application {
         mExecutorService.execute(new sendService(send_text));
     }
 
-//    public void receive() {
-//        mExecutorService.execute(new receiveService());
-//    }
-
     private class connectService implements Runnable {
         @Override
         public void run() {

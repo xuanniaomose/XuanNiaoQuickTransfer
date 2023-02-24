@@ -20,9 +20,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static xuanniao.transmission.trclient.Connect.socket;
+
 public class MainActivity extends AppCompatActivity {
 
     public static Handler handler_recv_msg;
+    public static Handler handler_connect_msg;
     public String receiveMsg;
     public String send_text;
     public EditText inputText;
@@ -40,7 +43,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         setCustomActionBar();
 
-
         msgRecyclerView = findViewById(R.id.recyclerView);
         // 定义一个线性布局管理器
         LinearLayoutManager manager = new LinearLayoutManager(this);
@@ -54,16 +56,40 @@ public class MainActivity extends AppCompatActivity {
         // 获取网络权限
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
-        // 启动连接服务
+        // 启动连接
         Connect Connect = new Connect();
         Log.i("连接", "开始");
         Connect.connect();
+
+        // 设置网络状态提示
+        textview_state0 = findViewById(R.id.textview_state0);
+        Socket socket = xuanniao.transmission.trclient.Connect.socket;
+        handler_connect_msg = new Handler() {
+            @Override
+            public void handleMessage(Message message) {
+                super.handleMessage(message);
+                if (message.what == 0) {
+                    textview_state0.setText("连接");
+                    textview_state0.setTextColor(0xff008000);
+                    Log.i("网络状态","连接");
+                } else {
+                    textview_state0.setText("断开");
+                    textview_state0.setTextColor(0xffff0000);
+                    Log.i("网络状态","断开");
+                }
+            }
+        };
+
         // 启动接收服务
-        Intent intent_Receive = new Intent(this, Receive.class);
-        intent_Receive.putExtra("Receive",10111);
-        Receive.enqueueWork(MainActivity.this,intent_Receive);
-        Log.i("MAIN", "启动接收服务");
-        handler_recv_msg = new Handler(){
+        if (socket != null) {
+            Log.i("接收服务", "开启");
+            Intent intent_Receive = new Intent(this, Receive.class);
+            intent_Receive.putExtra("Receive", 10111);
+            Receive.enqueueWork(MainActivity.this, intent_Receive);
+            Log.i("MAIN", "启动接收服务");
+        }
+
+        handler_recv_msg = new Handler() {
             @Override
             public void handleMessage(Message message) {
                 super.handleMessage(message);
@@ -75,23 +101,12 @@ public class MainActivity extends AppCompatActivity {
                     Log.i("MainSR消息列表2", content_List2.toString());
                     Log.i("MainSR类型列表2", type_List2.toString());
                     // msg_adapter通过局部更新方法添加尾项
-                    msg_adapter.notifyItemInserted(msg_adapter.getItemCount()-1);
+                    msg_adapter.notifyItemInserted(msg_adapter.getItemCount() - 1);
                     // msgRecyclerView跳转到尾项
-                    msgRecyclerView.scrollToPosition(msg_adapter.getItemCount()-1);
+                    msgRecyclerView.scrollToPosition(msg_adapter.getItemCount() - 1);
                 }
             }
         };
-
-        // 设置网络状态提示
-//        textview_state0 = findViewById(R.id.textview_state0);
-//        Socket socket = xuanniao.transmission.trclient.Connect.socket;
-//        if (socket == null) {
-//            textview_state0.setText("连接");
-//            textview_state0.setTextColor(0xff008000);
-//        } else {
-//            textview_state0.setText("断开");
-//            textview_state0.setTextColor(0xffff0000);
-//        }
 
         // 监听输入框
         SharedPreferences setInfo = getSharedPreferences("SetInfo", MODE_PRIVATE);

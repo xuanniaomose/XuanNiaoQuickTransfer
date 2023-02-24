@@ -131,7 +131,7 @@
                     android:layout_height="match_parent">
             </LinearLayout>
             <TextView
-                    android:text="玄鸟快传ver0.5"
+                    android:text="玄鸟快传ver0.3"
                     android:gravity="center"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

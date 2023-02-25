@@ -166,6 +166,7 @@ class Ui_XuanNiaoTR(object):
             # 特别注意：数据的结尾加上换行符才可让客户端的readline()停止阻塞
             self.client.send(bytes(self.send_buffer, 'utf8'))
             self.ChartBrowser.append(time.strftime('%H:%M:%S') + ' 服务器:\n' + self.send_buffer + '\n\n')
+            # self.client.shutdownOutput()
             # self.s_entry.clear()
         return
 
@@ -175,9 +176,13 @@ class Ui_XuanNiaoTR(object):
             try:
                 self.receive_buffer = str(self.client.recv(1024), 'utf8')
                 if self.receive_buffer != "":
-                    self.receive_str = self.receive_buffer
-                    self.ChartBrowser.insertPlainText(time.strftime('%H:%M:%S') + ' 客户端:\n' + self.receive_str + '\n')
-                    # self.ChartBrowser.moveCursor(QtGui.QTextCursor.End)
+                    print(self.receive_buffer)
+                    if self.receive_buffer == "hello! I get your message that is follow":
+                        self.ChartBrowser.append(time.strftime('%H:%M:%S') + ' 手机端:断开连接' + '\n\n')
+                    else:
+                        self.receive_str = self.receive_buffer
+                        self.ChartBrowser.insertPlainText(time.strftime('%H:%M:%S') + ' 客户端:\n' + self.receive_str + '\n')
+                        # self.ChartBrowser.moveCursor(QtGui.QTextCursor.End)
             except Exception as e:
                 print(e)
 

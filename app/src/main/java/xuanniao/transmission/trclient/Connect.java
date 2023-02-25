@@ -1,11 +1,14 @@
 package xuanniao.transmission.trclient;
 
 import android.app.Application;
+import android.content.Intent;
 import android.util.Log;
 import android.view.View;
 
 import java.io.*;
 import java.net.Socket;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -75,19 +78,30 @@ public class Connect extends Application {
             try {
                 socket = getSocket();
                 Log.i("socket.disconnect", String.valueOf(socket));
-                // 断开 客户端发送到服务器 的连接，即关闭输出流对象OutputStream
-                outputStream.close();
-                // 断开 服务器发送到客户端 的连接，即关闭输入流读取器对象BufferedReader
-//            bufferedReader.close();
-                // 最终关闭整个Socket连接
-                if (socket != null) {
-                    socket.close();
+                InputStream in = socket.getInputStream();
+                OutputStream out = socket.getOutputStream();
+                out.write("hello! I get your message that is follow".getBytes(StandardCharsets.UTF_8));
+                byte[] buf = new byte[1024];
+                int len;
+                while ((len = in.read(buf)) != -1) {
+                    System.out.print(new String(buf, 0, len, StandardCharsets.UTF_8));
+                    out.write(buf, 0, len);
                 }
-                // 判断客户端和服务器是否已经断开连接
-//                Log.d("断开连接", String.valueOf(socket.isConnected()));
+                out.write("\n end \n".getBytes(StandardCharsets.UTF_8));
+                out.flush();
+                socket.shutdownInput();
+                socket.shutdownOutput();
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                e.printStackTrace();
+            }finally {
+                try {
+                    socket.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
+            // 判断客户端和服务器是否已经断开连接
+            Log.d("断开连接", String.valueOf(socket.isConnected()));
         }
     }
 
@@ -110,6 +124,9 @@ public class Connect extends Application {
                 // 特别注意：数据的结尾加上换行符才可让服务器端的readline()停止阻塞
                 // 步骤3：发送数据到服务端
                 outputStream.flush();
+                // 步骤4：关闭输出流
+//                outputStream.close();
+                Log.i("输出线程","此时应该结束任务");
             } catch (IOException e) {
                 e.printStackTrace();
             }

@@ -14,7 +14,7 @@ import static xuanniao.transmission.trclient.Connect.socket;
 
 public class CheckConnect extends JobIntentService {
     String Tag = "CheckConnect";
-    private final int Time = 6000;    //时间间隔，单位 ms
+    private final int Time = 3000;    //时间间隔，单位 ms
     int N = 0;      //用来观测重复执行
     static final int JOB_ID = 2;
 
@@ -43,10 +43,11 @@ public class CheckConnect extends JobIntentService {
             public void run() {
                 handler_check.postDelayed(this, Time);
                 //每隔一段时间要重复执行的代码
-                Connect Connect = new Connect();
-                String check = String.valueOf(socket.isConnected());
-                if (check.equals("true")) {
-                    Log.i("连接","畅通");
+                String check_connect = String.valueOf(socket.isConnected());
+                String check_close = String.valueOf(socket.isClosed());
+                if (check_connect.equals("true")| check_close.equals("false")) {
+                    Log.i("check_connect",check_connect);
+                    Log.i("check_close",check_close);
                     Message message = new Message();
                     message.what = 1;
                     message.obj = "true";

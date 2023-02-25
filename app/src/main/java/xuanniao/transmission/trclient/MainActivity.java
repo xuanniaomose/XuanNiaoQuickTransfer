@@ -15,10 +15,12 @@ import android.widget.*;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.net.Socket;
+import java.util.concurrent.TimeUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static android.os.SystemClock.sleep;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -66,7 +68,6 @@ public class MainActivity extends AppCompatActivity {
         Log.i("MAIN", "启动连接检查服务");
         // 设置网络状态提示
         textview_state0 = findViewById(R.id.textview_state0);
-        Socket socket = Connect.socket;
         handler_check = new Handler() {
             @Override
             public void handleMessage(Message message) {
@@ -82,14 +83,12 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         };
-
         // 启动接收服务
         Log.i("接收服务", "开启");
         Intent intent_Receive = new Intent(this, Receive.class);
         intent_Receive.putExtra("Receive", 1);
         Receive.enqueueWork(MainActivity.this, intent_Receive);
         Log.i("MAIN", "启动接收服务");
-
 
         handler_recv_msg = new Handler() {
             @Override
@@ -184,6 +183,8 @@ public class MainActivity extends AppCompatActivity {
         a_toolbar_return.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Connect Connect = new Connect();
+                Connect.disconnect(a_toolbar_return);
                 Intent intent = new Intent(Intent.ACTION_MAIN);
                 intent.addCategory(Intent.CATEGORY_HOME);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

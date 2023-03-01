@@ -1,12 +1,16 @@
 package xuanniao.transmission.trclient;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.*;
+import android.provider.DocumentsContract;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
@@ -15,6 +19,7 @@ import android.widget.*;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.text.BreakIterator;
 import java.util.concurrent.TimeUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +36,6 @@ public class MainActivity extends AppCompatActivity {
     public EditText inputText;
     public static MsgAdapter msg_adapter = new MsgAdapter();
     public static List<Msg> msgList;
-    private Button button_send;
     private TextView textview_state0;
     private RecyclerView msgRecyclerView;
 
@@ -86,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
         // 启动接收服务
         Log.i("接收服务", "开启");
         Intent intent_Receive = new Intent(this, Receive.class);
-        intent_Receive.putExtra("Receive", 1);
+        intent_Receive.putExtra("Receive", 3);
         Receive.enqueueWork(MainActivity.this, intent_Receive);
         Log.i("MAIN", "启动接收服务");
 
@@ -127,16 +131,31 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        button_send = findViewById(R.id.button_send);
+        Button button_send = findViewById(R.id.button_send);
         inputText = findViewById(R.id.edittext_send);
+        Intent intent_SendFile = new Intent(this, SendFile.class);
         button_send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 send_text = inputText.getText().toString();
+                String send_msg;
                 if (!"".equals(send_text)) {
                     Connect Connect = new Connect();
-                    Connect.send(send_text);
-                    msgList.add(new Msg(send_text, 1));         //将输入的消息及其类型添加进消息数据列表中
+                    int mark = FileMark.check(send_text);
+                    Log.i("mark判定结果", String.valueOf(mark));
+                    if (mark == 1) {
+                        String fpath = FileMark.fpath(send_text);
+                        Log.i("fpath", fpath);
+                        String name = FileMark.name(fpath);
+                        send_msg = name;
+                        // 文件路径加载到意图，并开启文件传送服务
+                        intent_SendFile.putExtra("path", fpath);
+                        SendFile.enqueueWork(MainActivity.this, intent_SendFile);
+                    } else {
+                        send_msg = send_text;
+                        Connect.send(send_text);
+                    }
+                    msgList.add(new Msg(send_msg, 1));         //将输入的消息及其类型添加进消息数据列表中
                     msg_adapter.notifyItemInserted(msgList.size()-1);   //为RecyclerView添加末尾子项
                     msgRecyclerView.scrollToPosition(msgList.size()-1);       //跳转到当前位置
                     inputText.getText().clear();                            //清空输入框文本
@@ -147,6 +166,80 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
+        Button button_music = findViewById(R.id.button_music);
+        button_music.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // 获取音频文件
+                String path = "%2fDCIM%2fMusic%2f";
+                openDocument(path);
+            }
+        });
+
+        Button button_video = findViewById(R.id.button_video);
+        button_video.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // 获取视频文件
+                String path = "%2fDCIM%2fScreenrecorder%2f";
+                openDocument(path);
+            }
+        });
+
+        Button button_image = findViewById(R.id.button_image);
+        button_image.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.O)
+            @Override
+            public void onClick(View v) {
+                // 获取图片文件
+                String path = "%2fDCIM%2fCamera%2f";
+                openDocument(path);
+            }
+        });
+
+        Button button_picture = findViewById(R.id.button_picture);
+        button_picture.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // 获取截图文件
+                String path = "%2fDCIM%2fScreenshots%2f";
+                openDocument(path);
+            }
+        });
+
+        Button button_other = findViewById(R.id.button_other);
+        button_other.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // 获取其他文件
+                String path = "";
+                openDocument(path);
+            }
+        });
+    }
+
+    void openDocument(String path) {
+        Uri uri = Uri.parse("content://com.android.externalstorage.documents/document/primary:" + path);
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("*/*");//想要展示的文件类型
+        intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, uri);
+        startActivityForResult(intent, 0);
+    }
+
+    String path = "NULL";
+    @SuppressLint("SetTextI18n")
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == Activity.RESULT_OK) {
+            Uri uri = data.getData();
+            Log.i("MAIN获取到的uri", String.valueOf(uri));
+            FileChooseUtil FileChooseUtil = new FileChooseUtil(this);
+            path = FileChooseUtil.getPath(this, uri);
+            inputText.setText("@FileMark@" + path + "@FileMarkEnd@");
+        }
     }
 
     // 初始化RecyclerView

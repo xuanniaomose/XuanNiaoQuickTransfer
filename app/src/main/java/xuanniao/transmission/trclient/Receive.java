@@ -15,7 +15,7 @@ public class Receive extends JobIntentService {
     String Tag = "Receive";
     private final int Time = 5000;    //时间间隔，单位 ms
     int N = 0;      //用来观测重复执行
-    static final int JOB_ID = 1;
+    static final int JOB_ID = 3;
 
     static void enqueueWork(Context context, Intent work) {
         enqueueWork(context, Receive.class, JOB_ID, work);
@@ -58,12 +58,4 @@ public class Receive extends JobIntentService {
         handler_recv_time.postDelayed(runnable, Time);	//启动计时器
         Looper.loop();
     }
-
-    // 服务销毁时调用
-//    @Override
-//    public void onDestroy(){
-//        super.onDestroy();
-//        manager.cancel(pi);
-//        // Log.i("AlarmManager","onDestroy方法被调用");
-//    }
 }

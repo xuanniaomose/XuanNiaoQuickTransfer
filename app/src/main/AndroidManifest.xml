@@ -32,6 +32,15 @@
             </intent-filter>
         </service>
 
+        <service
+                android:name="xuanniao.transmission.trclient.SendFile"
+                android:exported="true"
+                android:permission="android.permission.BIND_JOB_SERVICE">
+            <intent-filter >
+                <action android:name="TrSend"/>
+            </intent-filter>
+        </service>
+
         <activity
                 android:name=".MainActivity"
                 android:exported="true">

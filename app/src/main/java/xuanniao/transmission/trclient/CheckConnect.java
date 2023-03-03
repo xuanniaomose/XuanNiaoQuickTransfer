@@ -3,6 +3,7 @@ package xuanniao.transmission.trclient;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.icu.util.TimeUnit;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -35,6 +36,11 @@ public class CheckConnect extends JobIntentService {
     protected void onHandleWork(@NonNull Intent intent) {
         // 每隔一段时间重复执行接收信息线程
         Log.i(Tag, "服务已开启");
+        try {
+            Thread.sleep(8000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         Looper.prepare();
         Handler handler_check = new Handler();
         Runnable runnable = new Runnable() {
@@ -43,9 +49,11 @@ public class CheckConnect extends JobIntentService {
             public void run() {
                 handler_check.postDelayed(this, Time);
                 //每隔一段时间要重复执行的代码
+                Connect Connect = new Connect();
+                socket = Connect.getSocket();
                 String check_connect = String.valueOf(socket.isConnected());
                 String check_close = String.valueOf(socket.isClosed());
-                if (check_connect.equals("true")| check_close.equals("false")) {
+                if (check_connect.equals("true") && check_close.equals("false")) {
                     Log.i("check_connect",check_connect);
                     Log.i("check_close",check_close);
                     Message message = new Message();
@@ -53,7 +61,7 @@ public class CheckConnect extends JobIntentService {
                     message.obj = "true";
                     MainActivity.handler_check.sendMessage(message);
                 } else {
-                    Log.i("连接", "断开");
+//                    Log.i("连接", "断开");
                     Message message = new Message();
                     message.what = 0;
                     message.obj = "false";
@@ -63,7 +71,7 @@ public class CheckConnect extends JobIntentService {
                 Log.i(Tag, "检查第" + N + "次执行");
             }
         };
-        handler_check.postDelayed(runnable, Time);	//启动计时器
+//        handler_check.postDelayed(runnable, Time);	//启动计时器
         Looper.loop();
     }
 }

@@ -1,92 +1,112 @@
 package xuanniao.transmission.trclient;
 
-import android.annotation.SuppressLint;
-import android.content.Context;
-import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
-import androidx.annotation.NonNull;
-import androidx.core.app.JobIntentService;
 
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.*;
 import java.net.Socket;
+import java.util.*;
 
-import static android.app.PendingIntent.getService;
-import static android.content.Intent.getIntent;
-import static xuanniao.transmission.trclient.Connect.socket;
-
-public class SendFile extends JobIntentService {
-
-    String Tag = "Receive";
-    private final int Time = 5000;    //时间间隔，单位 ms
-    int N = 0;      //用来观测重复执行
-    public Socket socket = Connect.socket;
-    static final int JOB_ID = 3;
+public class SendFile {
+    public static Handler handler_recv_msg;
+    public static Socket socket = Connect.socket;
     private FileInputStream fis;
-    private DataOutputStream dos;
+    private static DataOutputStream dos;
     private static File path;
-    private byte[] bytes;
-
-    static void enqueueWork(Context context, Intent work) {
-        enqueueWork(context, SendFile.class, JOB_ID, work);
-        path = new File(work.getStringExtra("path"));
-    }
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        Log.i(Tag,"创建");
-    }
-    //  不要重写onBind方法，否则会报错
-
-    @Override
+    private static byte[] bytes;
     // 服务功能的设置
-    protected void onHandleWork(@NonNull Intent intent) {
-        // 每隔一段时间重复执行接收信息线程
-        Log.i(Tag, "服务已开启");
-        Looper.prepare();
-        Handler handler_send_file = new Handler();
-        Runnable runnable = new Runnable() {
-            @SuppressLint("NotifyDataSetChanged")
-            @Override
-            public void run() {
-                try {
-                    while (true) {
-//                        MainActivity.textview_sendstate.setText("发送中");
-                        dos = new DataOutputStream(socket.getOutputStream());
-                        fis = new FileInputStream(path);
-                        bytes = new byte[(int)path.length()];
-                        //传输文件名称
-                        dos.writeUTF(path.getName());
-                        dos.flush();
-                        //传输文件长度
-                        dos.writeLong((int)path.length());
-                        dos.flush();
-                        int len=-1;
-                        // 将文件读取到字节数组
-                        while ((len = fis.read(bytes)) != -1) {
-                            // 把字节数组输出
-                            dos.write(bytes);
-                        }
-                        dos.flush();
-                        fis.close();
-                        dos.close();
-//                        MainActivity.progress.setText(100 + "%");
-//                        MainActivity.filename.setText("文件("+file.getName()+")发送完毕");
-                    }
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                N = N + 1;
-                Log.i(Tag, "第" + N + "次执行");
-            }
-        };
-//        handler_recv_time.postDelayed(runnable, Time);	//启动计时器
-        Looper.loop();
+    protected static void send_file(File path) {
+        try {
+            Connect Connect = new Connect();
+            socket = Connect.getSocket();
+//          MainActivity.textview_sendstate.setText("发送中");
+            dos = new DataOutputStream(socket.getOutputStream());
+//            bytes = new byte[(int)path.length()];
+            dos.writeUTF("@FilMark@"+path.getName()+"@FName@"+(int)path.length()+"@FLen@");
+            Log.i("SendFile","文件信息已发送");
+            dos.flush();
+            send(path);
+//            handler_recv_msg = new Handler(Looper.myLooper()) {
+//                @Override
+//                public void handleMessage(Message message) {
+//                    super.handleMessage(message);
+//                    if (message.obj == "准备接收") {
+//                        Log.i("SendFile","收到电脑端反馈");
+//
+//                    }
+//                }
+//            };
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
+
+    private static byte[] getToSendData(byte[] data,int off,int len) throws IOException{
+        System.out.println("off:"+off+",len:"+len);
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        outputStream.write(Utils.intToByteArray(len));
+        outputStream.write(data,off,len);
+        System.out.println(Arrays.toString(outputStream.toByteArray()));
+        return outputStream.toByteArray();
+    }
+
+    //MyService用ServiceHandler接收并处理来自于客户端的消息
+    private static void send(File path) {
+        try{
+//            InputStream in = socket.getInputStream();
+//            //计算上传百分百
+//            byte[] bufIn = new byte[1024];
+//            int num = in.read(bufIn);
+    //            int parseInt = Integer.parseInt(new String(bufIn,0,num));
+    //            if (parseInt == 0) {
+    //                System.out.println("已上传完成 ["+parseInt+"%]");
+    //            }else{
+    //                System.out.println("已上传完成 ["+Utils.division(parseInt, (int)path.length())+"]");
+    //            }
+
+                Log.i("SendFile","开始发送");
+            OutputStream ops = socket.getOutputStream();
+            // 获取文件的字节流
+            FileInputStream fis = new FileInputStream(path);
+            //2.往输出流里面投放数据
+            int file_len = (int)path.length();
+            int len = -1;
+            int n = 0;
+            byte[] buffer = new byte[1024];
+            while ((len = fis.read(buffer)) != -1) {
+//            while ((len = fis.read(buffer, 0, 1024)) != -1) {
+                n ++;
+                ops.write(buffer, 0, len);
+                if (file_len>0) {
+                    if (n>file_len) {
+                        fis.close();
+                        break;
+                    }
+                }
+
+//                int maxint = 512;
+//                int size = new Random().nextInt(maxint);
+//                while (size<=0) {
+//                    size = new Random().nextInt(maxint);
+//                }
+//                buffer = new byte[size];
+            }
+                Log.i("SendFile","发送完成");
+
+            //获取上传信息
+//            num = in.read(bufIn);
+//            if (!String.valueOf(num).equals("")) {
+//                System.out.println(new String(bufIn, 0, num));
+//            }
+            //关闭资源
+//                dos.close();
+//                in.close();
+//                socket.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }

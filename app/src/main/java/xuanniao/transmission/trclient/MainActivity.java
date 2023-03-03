@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.*;
 import android.provider.DocumentsContract;
+import android.provider.Settings;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import androidx.annotation.RequiresApi;
@@ -19,6 +20,7 @@ import android.widget.*;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.io.File;
 import java.text.BreakIterator;
 import java.util.concurrent.TimeUnit;
 import java.util.ArrayList;
@@ -38,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
     public static List<Msg> msgList;
     private TextView textview_state0;
     private RecyclerView msgRecyclerView;
+    private boolean isRefuse;
 
 
     @SuppressLint({"CutPasteId", "WrongViewCast", "HandlerLeak"})
@@ -46,6 +49,15 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setCustomActionBar();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && !isRefuse) {// android 11  且 不是已经被拒绝
+            // 先判断有没有权限
+            if (!Environment.isExternalStorageManager()) {
+                Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
+                intent.setData(Uri.parse("package:" + getPackageName()));
+                startActivityForResult(intent, 1024);
+            }
+        }
 
         msgRecyclerView = findViewById(R.id.recyclerView);
         // 定义一个线性布局管理器
@@ -109,6 +121,10 @@ public class MainActivity extends AppCompatActivity {
                     msg_adapter.notifyItemInserted(msg_adapter.getItemCount() - 1);
                     // msgRecyclerView跳转到尾项
                     msgRecyclerView.scrollToPosition(msg_adapter.getItemCount() - 1);
+                } else if (message.what == 2) {
+                    textview_state0.setText("断开");
+                    textview_state0.setTextColor(0xffff0000);
+                    Log.i("网络状态","断开");
                 }
             }
         };
@@ -148,9 +164,9 @@ public class MainActivity extends AppCompatActivity {
                         Log.i("fpath", fpath);
                         String name = FileMark.name(fpath);
                         send_msg = name;
-                        // 文件路径加载到意图，并开启文件传送服务
-                        intent_SendFile.putExtra("path", fpath);
-                        SendFile.enqueueWork(MainActivity.this, intent_SendFile);
+                        // 开启文件传送服务
+//                        intent_SendFile.putExtra("path", fpath);
+                        SendFile.send_file(new File(fpath));
                     } else {
                         send_msg = send_text;
                         Connect.send(send_text);
@@ -231,6 +247,7 @@ public class MainActivity extends AppCompatActivity {
     String path = "NULL";
     @SuppressLint("SetTextI18n")
     @Override
+    // 带回授权结果
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == Activity.RESULT_OK) {
@@ -239,6 +256,16 @@ public class MainActivity extends AppCompatActivity {
             FileChooseUtil FileChooseUtil = new FileChooseUtil(this);
             path = FileChooseUtil.getPath(this, uri);
             inputText.setText("@FileMark@" + path + "@FileMarkEnd@");
+        }
+        if (requestCode == 1024 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            // 检查是否有权限
+            if (Environment.isExternalStorageManager()) {
+                isRefuse = false;
+                // 授权成功
+            } else {
+                isRefuse = true;
+                // 授权失败
+            }
         }
     }
 

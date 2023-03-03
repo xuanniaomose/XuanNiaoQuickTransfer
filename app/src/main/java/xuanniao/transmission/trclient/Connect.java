@@ -2,11 +2,13 @@ package xuanniao.transmission.trclient;
 
 import android.app.Application;
 import android.content.Intent;
+import android.os.Message;
 import android.util.Log;
 import android.view.View;
 
 import java.io.*;
 import java.net.Socket;
+import java.net.SocketException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -80,7 +82,7 @@ public class Connect extends Application {
                 Log.i("socket.disconnect", String.valueOf(socket));
                 InputStream in = socket.getInputStream();
                 OutputStream out = socket.getOutputStream();
-                out.write("hello! I get your message that is follow".getBytes(StandardCharsets.UTF_8));
+                out.write("@EndMark@".getBytes(StandardCharsets.UTF_8));
                 byte[] buf = new byte[1024];
                 int len;
                 while ((len = in.read(buf)) != -1) {
@@ -145,7 +147,16 @@ public class Connect extends Application {
 //            while ((receiveMsg = bufferedReader.readLine()) != null) {
 //                Log.d("接收消息函数标记2", receiveMsg);
 //            }
-            if ((temp = inputStream.read(buffer)) != -1) {
+            try{
+                temp = inputStream.read(buffer);
+            }catch (SocketException e){
+                Message message = new Message();
+                message.what = 2;
+                message.obj = "对端掉线";
+                Log.i("提示","对端掉线");
+                MainActivity.handler_recv_msg.sendMessage(message);
+            }
+            if (temp != -1) {
                 receiveMsg = (new String(buffer, 0, temp));
                 Log.d("接收消息函数标记2", receiveMsg);
             } else {

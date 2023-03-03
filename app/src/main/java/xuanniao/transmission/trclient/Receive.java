@@ -10,6 +10,8 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.core.app.JobIntentService;
 
+import java.net.SocketException;
+
 public class Receive extends JobIntentService {
 
     String Tag = "Receive";
@@ -49,13 +51,17 @@ public class Receive extends JobIntentService {
                     Message message = new Message();
                     message.what = 0;
                     message.obj = receiveMsg;
+//                    if (receiveMsg.equals("准备接收")) {
+//                        SendFile.handler_recv_msg.sendMessage(message);
+//                    } else {
                     MainActivity.handler_recv_msg.sendMessage(message);
+//                    }
                 }
                 N = N + 1;
                 Log.i(Tag, "第" + N + "次执行");
             }
         };
-        handler_recv_time.postDelayed(runnable, Time);	//启动计时器
+        handler_recv_time.postDelayed(runnable, Time);    //启动计时器
         Looper.loop();
     }
 }

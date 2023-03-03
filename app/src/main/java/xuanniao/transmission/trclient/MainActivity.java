@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
         // 启动连接检查服务
         Log.i("连接检查服务", "开启");
         Intent intent_Check = new Intent(this, CheckConnect.class);
-        intent_Check.putExtra("CheckConnect", 2);
+        intent_Check.putExtra("CheckConnect", 0);
         CheckConnect.enqueueWork(MainActivity.this, intent_Check);
         Log.i("MAIN", "启动连接检查服务");
         // 设置网络状态提示
@@ -102,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
         // 启动接收服务
         Log.i("接收服务", "开启");
         Intent intent_Receive = new Intent(this, Receive.class);
-        intent_Receive.putExtra("Receive", 3);
+        intent_Receive.putExtra("Receive", 2);
         Receive.enqueueWork(MainActivity.this, intent_Receive);
         Log.i("MAIN", "启动接收服务");
 
@@ -165,8 +165,8 @@ public class MainActivity extends AppCompatActivity {
                         String name = FileMark.name(fpath);
                         send_msg = name;
                         // 开启文件传送服务
-//                        intent_SendFile.putExtra("path", fpath);
-                        SendFile.send_file(new File(fpath));
+                        intent_SendFile.putExtra("path", fpath);
+                        SendFile.enqueueWork(MainActivity.this, intent_SendFile);
                     } else {
                         send_msg = send_text;
                         Connect.send(send_text);

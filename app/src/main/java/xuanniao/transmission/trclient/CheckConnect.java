@@ -17,7 +17,7 @@ public class CheckConnect extends JobIntentService {
     String Tag = "CheckConnect";
     private final int Time = 3000;    //时间间隔，单位 ms
     int N = 0;      //用来观测重复执行
-    static final int JOB_ID = 2;
+    static final int JOB_ID = 0;
 
     static void enqueueWork(Context context, Intent work) {
         enqueueWork(context, CheckConnect.class, JOB_ID, work);

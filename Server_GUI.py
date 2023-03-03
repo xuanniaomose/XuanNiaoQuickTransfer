@@ -12,8 +12,11 @@ import threading
 from PyQt6 import QtCore, QtWidgets
 from PyQt6.QtWidgets import QApplication, QMainWindow
 
+import DropEdit
+from QEditDropHandler import QEditDropHandler
 
-class Ui_XuanNiaoTR(object):
+
+class Ui_XuanNiaoTR(QMainWindow):
 
     def __init__(self):
         super(Ui_XuanNiaoTR, self).__init__()
@@ -47,12 +50,12 @@ class Ui_XuanNiaoTR(object):
     def setupUi(self, XuanNiaoTR):
         XuanNiaoTR.setObjectName("XuanNiaoTR")
         # XuanNiaoTR.setEnabled(True)
-        XuanNiaoTR.resize(400, 536)
+        XuanNiaoTR.resize(400, 535)
         # XuanNiaoTR.setSizeGripEnabled(False)
         # XuanNiaoTR.setModal(False)
 
         self.frame_chart = QtWidgets.QFrame(XuanNiaoTR)
-        self.frame_chart.setGeometry(QtCore.QRect(0, 0, 400, 530))
+        self.frame_chart.setGeometry(QtCore.QRect(0, 0, 400, 535))
         self.frame_chart.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
         self.frame_chart.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)
         self.frame_chart.setObjectName("frame_chart")
@@ -85,7 +88,7 @@ class Ui_XuanNiaoTR(object):
         self.label_port.setGeometry(QtCore.QRect(180, 10, 71, 21))
         self.label_port.setObjectName("label_port")
 
-        self.lineEdit_port = QtWidgets.QLineEdit(self.frame_medium)
+        self.lineEdit_port = DropEdit.DropEdit(self.frame_medium)
         self.lineEdit_port.setGeometry(QtCore.QRect(250, 10, 50, 21))
         self.lineEdit_port.setInputMask("9999")
         self.lineEdit_port.setText("9999")
@@ -101,9 +104,13 @@ class Ui_XuanNiaoTR(object):
         # 聊天输入框
         self.s_entry = QtWidgets.QLineEdit(self.frame_chart)
         self.s_entry.setGeometry(QtCore.QRect(0, 370, 401, 141))
-        self.s_entry.setText("这里是电脑端")
+        # self.s_entry.setText("这里是电脑端")
+        self.s_entry.setAcceptDrops(True)  # 支持拖入操作
+        self.s_entry.setDragEnabled(True)  # 支持拽出操作
         self.s_entry.setObjectName("s_entry")
         self.s_entry.returnPressed.connect(self.sending)
+        self.s_entry.returnPressed.connect(self.dragEnterEvent)
+        self.s_entry.installEventFilter(QEditDropHandler(self))
         # 底部框体
         self.frame_bottom = QtWidgets.QFrame(self.frame_chart)
         self.frame_bottom.setGeometry(QtCore.QRect(0, 510, 401, 31))
@@ -116,6 +123,7 @@ class Ui_XuanNiaoTR(object):
         self.button_send.setObjectName("button_send")
         self.button_send.clicked.connect(self.sending)
 
+        self.setAcceptDrops(True)  # 支持拖入操作
         self.connecting()
         self.retranslateUi(XuanNiaoTR)
         self.lineEdit_ipv4.editingFinished.connect(self.lineEdit_ipv4.update)
@@ -130,6 +138,13 @@ class Ui_XuanNiaoTR(object):
         self.label_port.setText(_translate("XuanNiaoTR", "电脑端口号:"))
         self.checkBox_connect.setText(_translate("XuanNiaoTR", "连接状态"))
         self.button_send.setText(_translate("XuanNiaoTR", "发送"))
+
+    def dragEnterEvent(self, event):
+        file = event.mimeData().urls()[0].toLocalFile()
+        if file not in self.paths:  # ==> 去重显示
+            self.paths += file + "\n"
+            print("拖拽的文件 ==> {}".format(file))
+            self.s_entry.append(self.paths)
 
     def check_connect(self):
         print("状态改变")

@@ -13,7 +13,6 @@ import androidx.core.app.JobIntentService;
 import java.net.SocketException;
 
 public class Receive extends JobIntentService {
-
     String Tag = "Receive";
     private final int Time = 5000;    //时间间隔，单位 ms
     int N = 0;      //用来观测重复执行
@@ -22,14 +21,6 @@ public class Receive extends JobIntentService {
     static void enqueueWork(Context context, Intent work) {
         enqueueWork(context, Receive.class, JOB_ID, work);
     }
-
-    @SuppressLint({"ServiceCast", "WrongConstant", "UnspecifiedImmutableFlag"})
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        Log.i(Tag,"创建");
-    }
-    //  不要重写onBind方法，否则会报错
 
     @Override
     // 服务功能的设置
@@ -51,11 +42,7 @@ public class Receive extends JobIntentService {
                     Message message = new Message();
                     message.what = 0;
                     message.obj = receiveMsg;
-//                    if (receiveMsg.equals("准备接收")) {
-//                        SendFile.handler_recv_msg.sendMessage(message);
-//                    } else {
                     MainActivity.handler_recv_msg.sendMessage(message);
-//                    }
                 }
                 N = N + 1;
                 Log.i(Tag, "第" + N + "次执行");

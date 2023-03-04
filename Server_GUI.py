@@ -9,10 +9,13 @@ import sys
 import time
 import socket
 import threading
+from os import path
+
 from PyQt6 import QtCore, QtWidgets
 from PyQt6.QtWidgets import QApplication, QMainWindow
 
 import DropEdit
+import FileMark
 from QEditDropHandler import QEditDropHandler
 
 
@@ -139,12 +142,12 @@ class Ui_XuanNiaoTR(QMainWindow):
         self.checkBox_connect.setText(_translate("XuanNiaoTR", "连接状态"))
         self.button_send.setText(_translate("XuanNiaoTR", "发送"))
 
-    def dragEnterEvent(self, event):
-        file = event.mimeData().urls()[0].toLocalFile()
-        if file not in self.paths:  # ==> 去重显示
-            self.paths += file + "\n"
-            print("拖拽的文件 ==> {}".format(file))
-            self.s_entry.append(self.paths)
+    # def dragEnterEvent(self, event):
+    #     file = event.mimeData().urls()[0].toLocalFile()
+    #     if file not in self.paths:  # ==> 去重显示
+    #         self.paths += file + "\n"
+    #         print("拖拽的文件 ==> {}".format(file))
+    #         self.s_entry.append(self.paths)
 
     def check_connect(self):
         print("状态改变")
@@ -179,11 +182,27 @@ class Ui_XuanNiaoTR(QMainWindow):
     def send_data(self):
         self.send_buffer = self.s_entry.text()
         if self.send_buffer is not None:
-            # 特别注意：数据的结尾加上换行符才可让客户端的readline()停止阻塞
-            self.client.send(bytes(self.send_buffer, 'utf8'))
-            self.ChartBrowser.append(time.strftime('%H:%M:%S') + ' 服务器:\n' + self.send_buffer + '\n\n')
-            # self.client.shutdownOutput()
-            # self.s_entry.clear()
+            send_text = self.send_buffer
+            mark = FileMark.check(send_text)
+            if mark == 1:
+                file_path = str(FileMark.fpath(send_text))
+                file_name = str(FileMark.name(file_path))
+                file_len = str(path.getsize(file_path))
+                file_head = str("@FMark@"+file_name+"@FName@"+file_len+"@FLen@\n")
+                print(file_head)
+                self.client.send(bytes(file_head.encode("utf-8")))
+                print("文件信息已发送")
+                f = open(file_path, 'rb')
+                while 1:
+                    data = f.read(1024)
+                    if data is None:
+                        print("指定路径没有找到文件"+(path.basename(file_path)))
+                        break
+                    self.client.send(data)
+            else:
+                # 特别注意：数据的结尾加上换行符才可让客户端的readline()停止阻塞
+                self.client.send(bytes(send_text, 'utf-8'))
+                self.ChartBrowser.append(time.strftime('%H:%M:%S') + ' 服务器:\n' + self.send_buffer + '\n\n')
         return
 
     # 接收数据
@@ -192,17 +211,18 @@ class Ui_XuanNiaoTR(QMainWindow):
             try:
                 self.input_stream = self.client.recv(1024)
                 self.receive_buffer = str(self.input_stream, 'utf8')
-                msg_type = re.search(r"@\w{3}Mark@", self.receive_buffer, re.MULTILINE)
+                msg_type = re.search(r"@\wMark@", self.receive_buffer, re.MULTILINE)
                 if self.receive_buffer != "":
                     print(self.receive_buffer)
                     if self.receive_buffer == "@EndMark@\n":
                         self.ChartBrowser.append(time.strftime('%H:%M:%S') + ' 手机端:断开连接' + '\n\n')
                     # 用正则表达式判定接收内容是“断开”、“消息”还是“文件”
                     elif msg_type is not None:
+                        print(msg_type.group(0))
                         # 传输类型为文件
-                        if msg_type.group(0) == "@FilMark@":
+                        if msg_type.group(0) == "@FMark@":
                             # server_head_msg = json.loads(self.client.recv(1024))
-                            file_name = re.findall(r"@FilMark@(.*)@FName@", self.receive_buffer, re.M)[0]
+                            file_name = re.findall(r"@FMark@(.*)@FName@", self.receive_buffer, re.M)[0]
                             self.ChartBrowser.append(time.strftime('%H:%M:%S') + '手机端:\n' + str(file_name))
                             print(file_name)
                             file_path = 'E:/test/'

@@ -15,6 +15,6 @@ class QEditDropHandler(QtCore.QObject):
                 # 此处md.urls()的返回值为拖入文件的file路径列表，即支持多文件同时拖入；
                 # 此处默认读取第一个文件的路径进行处理，可按照个人需求进行相应的修改
                 url = md.urls()[0]
-                obj.setText(url.toLocalFile())
+                obj.setText("@FilMark@" + url.toLocalFile() + "@FilMarkEnd@")
                 return True
         return super().eventFilter(obj, event)

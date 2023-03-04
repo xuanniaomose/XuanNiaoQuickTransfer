@@ -27,7 +27,7 @@ public class SendFile extends JobIntentService {
             Connect Connect = new Connect();
             socket = Connect.getSocket();
             DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
-            dos.writeUTF("@Mark@"+path.getName()+"@FName@"+(int)path.length()+"@FLen@");
+            dos.writeUTF("@FMark@"+path.getName()+"@FName@"+(int)path.length()+"@FLen@");
             Log.i(Tag,"文件信息已发送");
             dos.flush();
             send(path);

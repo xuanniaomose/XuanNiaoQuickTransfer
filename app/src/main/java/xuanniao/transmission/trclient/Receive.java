@@ -70,10 +70,6 @@ public class Receive extends JobIntentService {
             Log.d("接收消息函数标记1", String.valueOf(bufferedReader));
             byte[] buffer = new byte[1024 * 4];
             int temp = 0;
-            // 从InputStream当中读取客户端所发送的数据
-//            while ((receiveMsg = bufferedReader.readLine()) != null) {
-//                Log.d("接收消息函数标记2", receiveMsg);
-//            }
             try{
                 temp = inputStream.read(buffer);
             }catch (SocketException e){
@@ -116,13 +112,6 @@ public class Receive extends JobIntentService {
         } else {
             fmark = 0;
         }
-//        String regex = "@FMark@.*";
-//        if (Pattern.matches(regex, receiveMsg)){
-//            fmark = 1;
-//            Log.i(Tag,"输入判定为文件");
-//        } else {
-//            fmark = 0;
-//        }
         Log.i(Tag, String.valueOf(fmark));
         return fmark;
     }
@@ -150,16 +139,15 @@ public class Receive extends JobIntentService {
             }
             Connect Connect = new Connect();
             Socket socket = Connect.getSocket();
-            DataInputStream dis = new DataInputStream(socket.getInputStream());
+            InputStream is = socket.getInputStream();
             FileOutputStream fos = new FileOutputStream(f, true); // true代表追加模式
-//            OutputStreamWriter osw = new OutputStreamWriter(fos, "utf-8");
 
             byte[] buffer = new byte[1024];
             int len = 0;
             int n = 0;
             int file_len_k = (file_len)/1024;
             Log.i(Tag, "准备写入");
-            while ((len = dis.read(buffer, 0, 1024)) != -1) {
+            while ((len = is.read(buffer, 0, 1024)) != -1) {
                 n ++;
                 fos.write(buffer, 0, len);
                 fos.flush();

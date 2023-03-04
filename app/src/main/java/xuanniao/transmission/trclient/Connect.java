@@ -135,41 +135,6 @@ public class Connect extends Application {
         }
     }
 
-    public String receiveMsg() {
-        String receiveMsg = null;
-        try {
-            InputStream inputStream = socket.getInputStream();
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, "utf-8"));
-            Log.d("接收消息函数标记1", String.valueOf(bufferedReader));
-            byte[] buffer = new byte[1024 * 4];
-            int temp = 0;
-            // 从InputStream当中读取客户端所发送的数据
-//            while ((receiveMsg = bufferedReader.readLine()) != null) {
-//                Log.d("接收消息函数标记2", receiveMsg);
-//            }
-            try{
-                temp = inputStream.read(buffer);
-            }catch (SocketException e){
-                Message message = new Message();
-                message.what = 2;
-                message.obj = "对端掉线";
-                Log.i("提示","对端掉线");
-                MainActivity.handler_recv_msg.sendMessage(message);
-            }
-            if (temp != -1) {
-                receiveMsg = (new String(buffer, 0, temp));
-                Log.d("接收消息函数标记2", receiveMsg);
-            } else {
-                Log.d("接收消息函数标记2", "没有收到信息");
-            }
-        } catch (UnsupportedEncodingException ex) {
-            throw new RuntimeException(ex);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return receiveMsg;
-    }
-
     public Socket getSocket() {
         Log.i("socket.G", String.valueOf(socket));
         return socket;
@@ -178,21 +143,5 @@ public class Connect extends Application {
     public void setSocket(Socket socket) {
         Log.i("socket.C", String.valueOf(socket));
         Connect.socket = socket;
-    }
-
-    public OutputStream getOutputStream() {
-        return outputStream;
-    }
-
-    public void setOutputStream(OutputStream outputStream) {
-        this.outputStream = outputStream;
-    }
-
-    public InputStream getInputStream() {
-        return inputStream;
-    }
-
-    public void setInputStream(InputStream inputStream) {
-        this.inputStream = inputStream;
     }
 }

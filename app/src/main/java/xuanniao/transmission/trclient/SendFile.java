@@ -13,8 +13,6 @@ public class SendFile extends JobIntentService {
     private static final int JOB_ID = 3;
     public static String Tag = "SendFile";
     public static Socket socket = Connect.socket;
-    private FileInputStream fis;
-    private static DataOutputStream dos;
     private static File path;
 
     static void enqueueWork(Context context, Intent work) {
@@ -28,8 +26,8 @@ public class SendFile extends JobIntentService {
         try {
             Connect Connect = new Connect();
             socket = Connect.getSocket();
-            dos = new DataOutputStream(socket.getOutputStream());
-            dos.writeUTF("@FilMark@"+path.getName()+"@FName@"+(int)path.length()+"@FLen@");
+            DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
+            dos.writeUTF("@Mark@"+path.getName()+"@FName@"+(int)path.length()+"@FLen@");
             Log.i(Tag,"文件信息已发送");
             dos.flush();
             send(path);
@@ -42,19 +40,19 @@ public class SendFile extends JobIntentService {
     private static void send(File path) {
         try{
             Log.i(Tag,"开始发送");
-            OutputStream ops = socket.getOutputStream();
+            DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
             // 获取文件的字节流
             FileInputStream fis = new FileInputStream(path);
             // 向输出流加载数据
-            int file_len = ((int)path.length())/1024;
+            int file_len_k = ((int)path.length())/1024;
             int len = -1;
             int n = 0;
             byte[] buffer = new byte[1024];
             while ((len = fis.read(buffer, 0, 1024)) != -1) {
                 n ++;
-                ops.write(buffer, 0, len);
-                ops.flush();
-                if (n>file_len) {
+                dos.write(buffer, 0, len);
+                dos.flush();
+                if (n>file_len_k) {
                     fis.close();
                     break;
                 }

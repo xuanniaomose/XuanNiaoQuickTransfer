@@ -140,7 +140,7 @@ public class Receive extends JobIntentService {
             }
             Connect Connect = new Connect();
             Socket socket = Connect.getSocket();
-            InputStream is = socket.getInputStream();
+            DataInputStream dis = new DataInputStream(socket.getInputStream());
 //            InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
             FileOutputStream fos = new FileOutputStream(f, true); // true代表追加模式
 
@@ -149,13 +149,15 @@ public class Receive extends JobIntentService {
             int n = 0;
             int file_len_k = (file_len)/1024;
             Log.i(Tag, "准备写入");
-            while ((len = is.read(buffer, 0, 1024)) != -1) {
-                n ++;
+            while ((len = dis.read(buffer, 0, 1024)) != -1) {
+                n = n + 1;
                 fos.write(buffer, 0, len);
                 fos.flush();
+                Log.i(Tag, String.valueOf(n));
 //                Log.i("接收进度：",(n/file_len_k*100)+"%");
                 if (n>file_len_k) {
                     fos.close();
+                    Log.i("接收完成：",file_name);
                     break;
                 }
             }

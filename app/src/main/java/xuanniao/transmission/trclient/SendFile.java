@@ -12,7 +12,7 @@ import java.net.Socket;
 public class SendFile extends JobIntentService {
     private static final int JOB_ID = 3;
     public static String Tag = "SendFile";
-    public static Socket socket = Connect.socket;
+    public static Socket socket;
     private static File path;
 
     static void enqueueWork(Context context, Intent work) {

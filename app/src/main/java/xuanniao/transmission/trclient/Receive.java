@@ -13,6 +13,7 @@ import androidx.core.app.JobIntentService;
 import java.io.*;
 import java.net.Socket;
 import java.net.SocketException;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -140,6 +141,7 @@ public class Receive extends JobIntentService {
             Connect Connect = new Connect();
             Socket socket = Connect.getSocket();
             InputStream is = socket.getInputStream();
+//            InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
             FileOutputStream fos = new FileOutputStream(f, true); // true代表追加模式
 
             byte[] buffer = new byte[1024];
@@ -157,6 +159,25 @@ public class Receive extends JobIntentService {
                     break;
                 }
             }
+
+//            BufferedReader br = new BufferedReader(new InputStreamReader(is, "gb2312"));
+//
+//            char[] char_buffer = new char[1024];
+//            int len = 0;
+//            int n = 0;
+//            int file_len_k = (file_len)/1024;
+//            Log.i(Tag, "准备写入");
+//            while ((len = br.read(char_buffer, 0, 1024)) != -1) {
+//                n ++;
+//                byte[] buffer = CharByteKit.getBytes(char_buffer);
+//                fos.write(buffer, 0, len);
+//                fos.flush();
+////                Log.i("接收进度：",(n/file_len_k*100)+"%");
+//                if (n>file_len_k) {
+//                    fos.close();
+//                    break;
+//                }
+//            }
             fos.close();
             Log.i("接收完成：",file_name);
             } catch (IOException e) {

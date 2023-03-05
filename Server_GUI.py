@@ -192,6 +192,7 @@ class Ui_XuanNiaoTR(QMainWindow):
                 print(file_head)
                 self.client.send(bytes(file_head.encode("utf-8")))
                 print("文件信息已发送")
+                time.sleep(0.5)
                 f = open(file_path, 'rb')
                 while 1:
                     data = f.read(1024)

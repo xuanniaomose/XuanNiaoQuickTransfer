@@ -27,10 +27,24 @@ public class SendFile extends JobIntentService {
             Connect Connect = new Connect();
             socket = Connect.getSocket();
             DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
-            dos.writeUTF("@FMark@"+path.getName()+"@FName@"+(int)path.length()+"@FLen@");
+//            dos.writeUTF("@FMark@"+path.getName()+"@FName@"+(int)path.length()+"@FLen@");
+            dos.write(("@FMark@"+path.getName()+"@FName@"+(int)path.length()+"@FLen@").getBytes());
             Log.i(Tag,"文件信息已发送");
-            dos.flush();
-            send(path);
+//            dos.flush();
+            FileInputStream fis = new FileInputStream(path);
+            int file_len_k = ((int)path.length())/1024;
+            int len = -1;
+            int n = 0;
+            byte[] buffer = new byte[1024];
+            while ((len = fis.read(buffer, 0, 1024)) != -1) {
+                n ++;
+                dos.write(buffer, 0, len);
+                dos.flush();
+                if (n>file_len_k) {
+                    fis.close();
+                    break;
+                }
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

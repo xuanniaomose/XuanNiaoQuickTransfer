@@ -14,6 +14,7 @@ import java.io.*;
 import java.net.Socket;
 import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -66,23 +67,23 @@ public class Receive extends JobIntentService {
         try {
             Connect Connect = new Connect();
             Socket socket = Connect.getSocket();
-            InputStream inputStream = socket.getInputStream();
+            DataInputStream inputStream = new DataInputStream(socket.getInputStream());
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, "utf-8"));
             Log.d("接收消息函数标记1", String.valueOf(bufferedReader));
-            byte[] buffer = new byte[1024 * 4];
+            byte[] buffer = new byte[1024];
             int temp = 0;
-            try{
+            try {
                 temp = inputStream.read(buffer);
-            }catch (SocketException e){
+            } catch (SocketException e) {
                 Message message = new Message();
                 message.what = 2;
                 message.obj = "对端掉线";
-                Log.i("提示","对端掉线");
+                Log.i("提示", "对端掉线");
                 MainActivity.handler_recv_msg.sendMessage(message);
             }
             if (temp != -1) {
                 receiveMsg = (new String(buffer, 0, temp));
-                Log.d("接收消息函数标记2", receiveMsg);
+                Log.d("接收消息函数标记2", "temp:"+ temp);
             } else {
                 Log.d("接收消息函数标记2", "没有收到信息");
             }
@@ -149,15 +150,16 @@ public class Receive extends JobIntentService {
             int n = 0;
             int file_len_k = (file_len)/1024;
             Log.i(Tag, "准备写入");
-            while ((len = dis.read(buffer, 0, 1024)) != -1) {
+            while ((len = dis.read(buffer)) != -1) {
                 n = n + 1;
+                Log.i(Tag, Arrays.toString(buffer));
                 fos.write(buffer, 0, len);
                 fos.flush();
                 Log.i(Tag, String.valueOf(n));
 //                Log.i("接收进度：",(n/file_len_k*100)+"%");
                 if (n>file_len_k) {
                     fos.close();
-                    Log.i("接收完成：",file_name);
+                    Log.i("接收完成：","接收完成");
                     break;
                 }
             }
@@ -180,10 +182,9 @@ public class Receive extends JobIntentService {
 //                    break;
 //                }
 //            }
-            fos.close();
-            Log.i("接收完成：",file_name);
+            Log.i("接收完成：","接收完成f");
             } catch (IOException e) {
-                Log.i(Tag, "写入文件失败");
+                Log.i(Tag, "写入文件失败"+e);
             }
     }
 }

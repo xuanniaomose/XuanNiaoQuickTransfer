@@ -180,19 +180,19 @@ class Ui_XuanNiaoTR(QMainWindow):
 
     # 发送数据
     def send_data(self):
-        self.send_buffer = self.s_entry.text()
-        if self.send_buffer is not None:
-            send_text = self.send_buffer
+        if self.s_entry.text() is not None:
+            send_text = self.s_entry.text()
             mark = FileMark.check(send_text)
             if mark == 1:
                 file_path = str(FileMark.fpath(send_text))
                 file_name = str(FileMark.name(file_path))
                 file_len = str(path.getsize(file_path))
-                file_head = str("@FMark@"+file_name+"@FName@"+file_len+"@FLen@\n")
-                print(file_head)
+                file_head = str("@FMark@"+file_name+"@FName@"+file_len+"@FLen@")
+                # file_head = file_head.ljust(1008, "0")
+                print(file_head+"\n", len(file_head))
                 self.client.send(bytes(file_head.encode("utf-8")))
                 print("文件信息已发送")
-                time.sleep(0.5)
+                time.sleep(0.3)
                 f = open(file_path, 'rb')
                 while 1:
                     data = f.read(1024)
@@ -200,6 +200,8 @@ class Ui_XuanNiaoTR(QMainWindow):
                         print("指定路径没有找到文件"+(path.basename(file_path)))
                         break
                     self.client.send(data)
+                    f.flush()
+                f.close()
             else:
                 # 特别注意：数据的结尾加上换行符才可让客户端的readline()停止阻塞
                 self.client.send(bytes(send_text, 'utf-8'))
@@ -211,6 +213,7 @@ class Ui_XuanNiaoTR(QMainWindow):
         while True:
             try:
                 self.input_stream = self.client.recv(1024)
+                print(self.input_stream)
                 self.receive_buffer = str(self.input_stream, 'utf8')
                 msg_type = re.search(r"@\wMark@", self.receive_buffer, re.MULTILINE)
                 if self.receive_buffer != "":
@@ -238,6 +241,7 @@ class Ui_XuanNiaoTR(QMainWindow):
                                 else:
                                     length = file_len - recv_len
                                 data = self.client.recv(length)
+                                print(str(data), 'utf-8')
                                 data_len = len(data)
                                 recv_len += data_len
                                 print("已接收：", int(recv_len/file_len*100), "%")

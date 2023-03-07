@@ -15,20 +15,11 @@
 
         <!--注册Service-->
         <service
-                android:name="xuanniao.transmission.trclient.Receive"
+                android:name="xuanniao.transmission.trclient.Connect"
                 android:exported="true"
                 android:permission="android.permission.BIND_JOB_SERVICE">
             <intent-filter >
-                <action android:name="TrReceive"/>
-            </intent-filter>
-        </service>
-
-        <service
-                android:name="xuanniao.transmission.trclient.SendFile"
-                android:exported="true"
-                android:permission="android.permission.BIND_JOB_SERVICE">
-            <intent-filter >
-                <action android:name="TrReceive"/>
+                <action android:name="TrConnect"/>
             </intent-filter>
         </service>
 
@@ -38,6 +29,24 @@
                 android:permission="android.permission.BIND_JOB_SERVICE">
             <intent-filter >
                 <action android:name="TrCheck"/>
+            </intent-filter>
+        </service>
+
+        <service
+                android:name="xuanniao.transmission.trclient.Receive"
+                android:exported="true"
+                android:permission="android.permission.BIND_JOB_SERVICE">
+            <intent-filter >
+                <action android:name="TrReceive"/>
+            </intent-filter>
+        </service>
+
+        <service
+                android:name="xuanniao.transmission.trclient.Send"
+                android:exported="true"
+                android:permission="android.permission.BIND_JOB_SERVICE">
+            <intent-filter >
+                <action android:name="TrReceive"/>
             </intent-filter>
         </service>
 

@@ -2,7 +2,9 @@ package xuanniao.transmission.trclient;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -30,10 +32,10 @@ import java.util.stream.Collectors;
 import static android.os.SystemClock.sleep;
 
 public class MainActivity extends AppCompatActivity {
-
-    public static Handler handler_recv_msg;
+    public static Handler handler_connect;
     public static Handler handler_check;
-    public String receiveMsg;
+    public static Handler handler_recv_msg;
+    public String Tag = "MAIN";
     public String send_text;
     public EditText inputText;
     public static MsgAdapter msg_adapter = new MsgAdapter();
@@ -72,44 +74,86 @@ public class MainActivity extends AppCompatActivity {
         // 获取网络权限
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
-        // 启动连接服务
-        Connect Connect = new Connect();
-        Log.i("连接", "开始");
-        Connect.connect();
-        // 启动连接检查服务
-        Log.i("连接检查服务", "开启");
-        Intent intent_Check = new Intent(this, CheckConnect.class);
-        intent_Check.putExtra("CheckConnect", 0);
-        CheckConnect.enqueueWork(MainActivity.this, intent_Check);
-        Log.i("MAIN", "启动连接检查服务");
-        // 设置网络状态提示
-        textview_state0 = findViewById(R.id.textview_state0);
-        handler_check = new Handler() {
+
+        //获取SharedPreferences对象
+        SharedPreferences sharedPreferences = getSharedPreferences("config", Context.MODE_PRIVATE);
+        int connect_status = sharedPreferences.getInt("connect_status", 0);
+        if (connect_status == 1) {
+            // 启动连接服务
+            Log.i("主连接服务", "开启");
+            Intent intent_Connect = new Intent(this, Connect.class);
+            intent_Connect.putExtra("connect_order", 1);
+            xuanniao.transmission.trclient.Connect.enqueueWork(MainActivity.this, intent_Connect);
+            Log.i(Tag, "启动主连接服务");
+            // 启动连接检查服务
+            Log.i("连接检查服务", "开启");
+            Intent intent_Check = new Intent(this, CheckConnect.class);
+            intent_Check.putExtra("CheckConnect", 1);
+            CheckConnect.enqueueWork(MainActivity.this, intent_Check);
+            Log.i(Tag, "启动连接检查服务");
+            // 设置网络状态提示
+            textview_state0 = findViewById(R.id.textview_state0);
+            handler_check = new Handler() {
+                @Override
+                public void handleMessage(Message message) {
+                    super.handleMessage(message);
+                    if (message.obj == "true") {
+                        textview_state0.setText("连接");
+                        textview_state0.setTextColor(0xff008000);
+                        Log.i("网络状态","连接");
+                    } else {
+                        textview_state0.setText("断开");
+                        textview_state0.setTextColor(0xffff0000);
+                        Log.i("网络状态","断开");
+                    }
+                }
+            };
+        } else {
+            Toast.makeText(this, "当前为离线模式，请在设置中校正电脑端ipv4并开启连接", Toast.LENGTH_SHORT).show();
+        }
+
+        // 启动接收服务
+        handler_connect = new Handler() {
             @Override
             public void handleMessage(Message message) {
-                super.handleMessage(message);
-                if (message.obj == "true") {
-                    textview_state0.setText("连接");
-                    textview_state0.setTextColor(0xff008000);
-                    Log.i("网络状态","连接");
+                if (message.what == 1) {
+                    Toast.makeText(MainActivity.this, "连接成功", Toast.LENGTH_SHORT).show();
+                    Log.i("接收服务", "开启");
+                    Intent intent_Receive = new Intent(MainActivity.this, Receive.class);
+                    intent_Receive.putExtra("Receive", 2);
+                    Receive.enqueueWork(MainActivity.this, intent_Receive);
+                    Log.i("MAIN", "启动接收服务");
                 } else {
-                    textview_state0.setText("断开");
-                    textview_state0.setTextColor(0xffff0000);
-                    Log.i("网络状态","断开");
+                    AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
+//                        .setIcon(R.mipmap.icon)//设置标题的图片
+                        .setTitle("连接失败")//设置对话框的标题
+                        .setMessage("是否重新连接")//设置对话框的内容
+                        //设置对话框的按钮
+                        .setNegativeButton("离线", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                Toast.makeText(MainActivity.this, "离线模式下无法传输文件", Toast.LENGTH_SHORT).show();
+                                dialog.dismiss();
+                            }
+                        })
+                        .setPositiveButton("重连", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                Toast.makeText(MainActivity.this, "开始重新连接", Toast.LENGTH_SHORT).show();
+                                dialog.dismiss();
+                                Intent intent_Connect = new Intent(MainActivity.this, Connect.class);
+                                intent_Connect.putExtra("connect_order", 1);
+                                xuanniao.transmission.trclient.Connect.enqueueWork(MainActivity.this, intent_Connect);
+                            }
+                        }).create();
+                    dialog.show();
                 }
             }
         };
-        // 启动接收服务
-        Log.i("接收服务", "开启");
-        Intent intent_Receive = new Intent(this, Receive.class);
-        intent_Receive.putExtra("Receive", 2);
-        Receive.enqueueWork(MainActivity.this, intent_Receive);
-        Log.i("MAIN", "启动接收服务");
 
         handler_recv_msg = new Handler() {
             @Override
             public void handleMessage(Message message) {
-                super.handleMessage(message);
                 if (message.what == 0) {
                     // 把新消息添加进msgList
                     msgList.add(msgList.size(), new Msg((String) message.obj, message.what));
@@ -133,12 +177,11 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences setInfo = getSharedPreferences("SetInfo", MODE_PRIVATE);
         SharedPreferences.Editor editor = setInfo.edit();
         EditText edittext_send = findViewById(R.id.edittext_send);
-        send_text = String.valueOf(edittext_send);
         edittext_send.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
                 if (i == EditorInfo.IME_ACTION_DONE) {
-//                    edittext = textView.getText().toString();
+                    send_text = edittext_send.getText().toString();
                     editor.putString("上传文本", send_text);
                     editor.apply();
                     Log.i("上传之文本：", send_text);
@@ -149,7 +192,7 @@ public class MainActivity extends AppCompatActivity {
 
         Button button_send = findViewById(R.id.button_send);
         inputText = findViewById(R.id.edittext_send);
-        Intent intent_SendFile = new Intent(this, SendFile.class);
+        Intent intent_SendFile = new Intent(this, Send.class);
         button_send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -166,10 +209,10 @@ public class MainActivity extends AppCompatActivity {
                         send_msg = name;
                         // 开启文件传送服务
                         intent_SendFile.putExtra("path", fpath);
-                        SendFile.enqueueWork(MainActivity.this, intent_SendFile);
+                        Send.enqueueWork(MainActivity.this, intent_SendFile);
                     } else {
                         send_msg = send_text;
-                        Connect.send(send_text);
+                        Send.sendM(send_text);
                     }
                     msgList.add(new Msg(send_msg, 1));         //将输入的消息及其类型添加进消息数据列表中
                     msg_adapter.notifyItemInserted(msgList.size()-1);   //为RecyclerView添加末尾子项
@@ -303,8 +346,10 @@ public class MainActivity extends AppCompatActivity {
         a_toolbar_return.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Connect Connect = new Connect();
-                Connect.disconnect(a_toolbar_return);
+                Intent intent_Connect = new Intent(MainActivity.this, Connect.class);
+                intent_Connect.putExtra("connect_order", 0);
+                Connect.enqueueWork(MainActivity.this, intent_Connect);
+
                 Intent intent = new Intent(Intent.ACTION_MAIN);
                 intent.addCategory(Intent.CATEGORY_HOME);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

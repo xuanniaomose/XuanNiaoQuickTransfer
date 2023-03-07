@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -21,7 +22,7 @@
             <CheckBox
                     android:text="开启即连"
                     android:layout_height="wrap_content"
-                    android:id="@+id/checkBox"
+                    android:id="@+id/checkBox1"
                     android:layout_width="wrap_content"/>
             <LinearLayout
                     android:orientation="horizontal"
@@ -33,66 +34,7 @@
                     android:layout_height="wrap_content"
                     android:id="@+id/textView"/>
         </TableRow>
-        <TableRow android:layout_width="match_parent"
-                  android:layout_height="match_parent"
-                  android:gravity="center_vertical">
-            <CheckBox
-                    android:text="自动寻址"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/checkBox3"/>
-            <LinearLayout
-                    android:orientation="horizontal"
-                    android:layout_width="25dp"
-                    android:layout_height="match_parent">
-            </LinearLayout>
-            <TextView
-                    android:text="勾选自动导入电脑Ipv4地址"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/textView2"/>
-        </TableRow>
-        <TableRow android:layout_width="match_parent"
-                  android:layout_height="match_parent"
-                  android:gravity="center_vertical">
-            <TextView
-                    android:text="电脑ipv4地址"
-                    android:gravity="center"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/textView3"/>
-            <LinearLayout
-                    android:orientation="horizontal"
-                    android:layout_width="25dp"
-                    android:layout_height="match_parent">
-            </LinearLayout>
-            <EditText
-                    android:layout_height="wrap_content"
-                    android:inputType="numberDecimal"
-                    android:gravity="center"
-                    android:text="@string/ipv4"
-                    android:textSize="15sp"
-                    android:ems="10"
-                    android:id="@+id/edittext_ipv4_num"/>
-        </TableRow>
-        <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:layout_weight="1">
-            <TextView
-                    android:text="使用端口"
-                    android:gravity="center"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/textView6"/>
-            <LinearLayout
-                    android:orientation="horizontal"
-                    android:layout_width="25dp"
-                    android:layout_height="match_parent">
-            </LinearLayout>
-            <TextView
-                    android:text="@string/port"
-                    android:gravity="center"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/textview_port_num"/>
-        </TableRow>
+
         <TableRow
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -115,6 +57,49 @@
                     android:id="@+id/textview_state1"/>
         </TableRow>
 
+        <TableRow android:layout_width="match_parent"
+                  android:layout_height="match_parent"
+                  android:gravity="center_vertical">
+            <TextView
+                    android:text="电脑ipv4地址"
+                    android:gravity="center"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/textview_ipv4"/>
+            <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="25dp"
+                    android:layout_height="match_parent">
+            </LinearLayout>
+            <EditText
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@string/ipv4"
+                    android:textSize="15sp"
+                    android:id="@+id/edittext_ipv4_num"/>
+        </TableRow>
+
+        <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:layout_weight="1">
+            <TextView
+                    android:text="电脑端端口"
+                    android:gravity="center"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/textView6"/>
+            <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="25dp"
+                    android:layout_height="match_parent">
+            </LinearLayout>
+            <TextView
+                    android:text="@string/port"
+                    android:gravity="center"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/textview_port_num"/>
+        </TableRow>
+
         <TableRow
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -132,12 +117,23 @@
                     android:layout_height="match_parent">
             </LinearLayout>
             <TextView
-                    android:text="玄鸟快传ver0.7"
+                    android:text="玄鸟快传ver0.9"
                     android:gravity="center"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/textview_version_num"/>
         </TableRow>
 
+        <TableRow android:layout_width="match_parent"
+                  android:layout_height="match_parent"
+                  android:gravity="center_vertical">
+                    <!--在这里增加新项-->
+            <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="25dp"
+                    android:layout_height="match_parent">
+            </LinearLayout>
+                    <!--在这里增加新项说明-->
+        </TableRow>
     </TableLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

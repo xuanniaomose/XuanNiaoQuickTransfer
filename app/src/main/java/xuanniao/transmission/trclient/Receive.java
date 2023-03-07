@@ -37,7 +37,6 @@ public class Receive extends JobIntentService {
         Looper.prepare();
         Handler handler_recv_time = new Handler();
         Runnable runnable = new Runnable() {
-            @SuppressLint("NotifyDataSetChanged")
             @Override
             public void run() {
                 handler_recv_time.postDelayed(this, Time);

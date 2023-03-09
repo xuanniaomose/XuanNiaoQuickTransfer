@@ -1,4 +1,4 @@
-# 玄鸟快传XuanNiaoQuickTransfer
+# 玄鸟快传XuanNiaoQuickTransfer_forWindows
 
 v0.7 2023.3.4
 实装了文件发送功能

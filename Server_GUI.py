@@ -2,12 +2,15 @@ import re
 import sys
 import time
 import socket
+
+from PyQt5.QtCore import Qt, QPoint
+from PyQt5.QtGui import QMouseEvent
+
+import FileMark
 import threading
 from os import path
-
 from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.QtWidgets import QApplication, QMainWindow
-import FileMark
 
 
 class Ui_XuanNiaoTR(QMainWindow):
@@ -191,7 +194,8 @@ class Ui_XuanNiaoTR(QMainWindow):
         self.layout_medium.setContentsMargins(-1, -1, 9, -1)
         self.layout_medium.setObjectName("layout_medium")
         self.label_ipv4 = QtWidgets.QLabel(self.frame_medium)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred, QtWidgets.QSizePolicy.Policy.Preferred)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Preferred, QtWidgets.QSizePolicy.Policy.Preferred)
         sizePolicy.setHorizontalStretch(50)
         sizePolicy.setVerticalStretch(20)
         sizePolicy.setHeightForWidth(self.label_ipv4.sizePolicy().hasHeightForWidth())
@@ -200,7 +204,8 @@ class Ui_XuanNiaoTR(QMainWindow):
         self.label_ipv4.setObjectName("label_ipv4")
         self.layout_medium.addWidget(self.label_ipv4)
         self.lineEdit_ipv4 = QtWidgets.QLineEdit(self.frame_medium)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Fixed)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Fixed)
         sizePolicy.setHorizontalStretch(110)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.lineEdit_ipv4.sizePolicy().hasHeightForWidth())
@@ -211,7 +216,8 @@ class Ui_XuanNiaoTR(QMainWindow):
         self.lineEdit_ipv4.setObjectName("lineEdit_ipv4")
         self.layout_medium.addWidget(self.lineEdit_ipv4)
         self.label_port = QtWidgets.QLabel(self.frame_medium)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred, QtWidgets.QSizePolicy.Policy.Preferred)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Preferred, QtWidgets.QSizePolicy.Policy.Preferred)
         sizePolicy.setHorizontalStretch(50)
         sizePolicy.setVerticalStretch(20)
         sizePolicy.setHeightForWidth(self.label_port.sizePolicy().hasHeightForWidth())
@@ -220,7 +226,8 @@ class Ui_XuanNiaoTR(QMainWindow):
         self.label_port.setObjectName("label_port")
         self.layout_medium.addWidget(self.label_port)
         self.lineEdit_port = QtWidgets.QLineEdit(self.frame_medium)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Fixed)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Fixed)
         sizePolicy.setHorizontalStretch(45)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.lineEdit_port.sizePolicy().hasHeightForWidth())
@@ -229,7 +236,8 @@ class Ui_XuanNiaoTR(QMainWindow):
         self.lineEdit_port.setStyleSheet("background-color: rgba(255,255,255, 240)")
         self.lineEdit_port.setObjectName("lineEdit_port")
         self.layout_medium.addWidget(self.lineEdit_port)
-        spacerItem1 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Minimum)
+        spacerItem1 = QtWidgets.QSpacerItem(
+            40, 20, QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Minimum)
         self.layout_medium.addItem(spacerItem1)
         self.checkBox_connect = QtWidgets.QCheckBox(self.frame_medium)
         self.checkBox_connect.setStyleSheet("background-color: rgba(255,255,255, 0)")
@@ -239,7 +247,8 @@ class Ui_XuanNiaoTR(QMainWindow):
         self.layout_medium.addWidget(self.checkBox_connect)
         self.layout_chart.addWidget(self.frame_medium)
         self.entry_send = QtWidgets.QLineEdit(self.frame_chart)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Expanding)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.entry_send.sizePolicy().hasHeightForWidth())
@@ -254,10 +263,12 @@ class Ui_XuanNiaoTR(QMainWindow):
         self.layout_bottom.setContentsMargins(0, 0, 0, 0)
         self.layout_bottom.setSpacing(0)
         self.layout_bottom.setObjectName("layout_bottom")
-        spacerItem2 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Minimum)
+        spacerItem2 = QtWidgets.QSpacerItem(
+            40, 20, QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Minimum)
         self.layout_bottom.addItem(spacerItem2)
         self.pushButton_send = QtWidgets.QPushButton(self.frame_bottom)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Expanding)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.pushButton_send.sizePolicy().hasHeightForWidth())
@@ -442,6 +453,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.__ui = Ui_XuanNiaoTR()
+        self.setWindowFlags(Qt.FramelessWindowHint)
         self.__ui.setupUi(self)
         self.setWindowTitle('玄鸟快传')  # 设置窗口标题要在窗口ui创建之后
 

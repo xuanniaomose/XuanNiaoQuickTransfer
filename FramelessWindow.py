@@ -6,7 +6,7 @@ import win32con
 import win32gui
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QCloseEvent, QCursor
-from PyQt5.QtWidgets import QApplication, QWidget
+from PyQt5.QtWidgets import QApplication, QWidget, QDialog, QMainWindow
 from PyQt5.QtWinExtras import QtWin
 
 from CustomTitleBar import TitleBar
@@ -200,3 +200,20 @@ class NCCALCSIZE_PARAMS(Structure):
         ('rgrc', RECT * 3),
         ('lppos', POINTER(PWINDOWPOS))
     ]
+
+
+class FramelessDialog(QDialog, WindowsFramelessWindow):
+    """ Frameless dialog """
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.titleBar.minBtn.hide()
+        self.titleBar.maxBtn.hide()
+        self.titleBar.setDoubleClickEnabled(False)
+
+
+class FramelessMainWindow(QMainWindow, WindowsFramelessWindow):
+    """ Frameless main window """
+
+    def __init__(self, parent=None):
+        super().__init__(parent)

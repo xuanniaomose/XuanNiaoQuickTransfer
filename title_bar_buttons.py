@@ -7,8 +7,6 @@ from PyQt5.QtWidgets import QAbstractButton
 from PyQt5.QtSvg import QSvgRenderer
 from PyQt5.QtXml import QDomDocument
 
-from .._rc import resource
-
 
 class TitleBarButtonState(Enum):
     """ Title bar button state """

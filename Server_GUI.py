@@ -1,6 +1,8 @@
 import sys
 from PyQt5 import QtCore, QtWidgets, QtGui
-from PyQt5.QtWidgets import QApplication, QMainWindow
+from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtGui import QCursor
+from PyQt5.QtWidgets import QApplication, QMainWindow, QInputDialog, QFileDialog
 
 from QEditDropHandler import QEditDropHandler
 
@@ -36,6 +38,8 @@ class Ui_XuanNiaoTR(QMainWindow):
         self.frame_bottom = None
         self.layout_bottom = None
         self.pushButton_send = None
+
+        self.path = None
 
         self.setupUi(self)
 
@@ -243,6 +247,7 @@ class Ui_XuanNiaoTR(QMainWindow):
         self.entry_send.installEventFilter(QEditDropHandler(self))
         self.entry_send.setStyleSheet("border: none;")
         self.entry_send.setObjectName("entry_send")
+        self.entry_send.returnPressed.connect(self.sending)
         self.layout_chart.addWidget(self.entry_send)
         self.frame_bottom = QtWidgets.QFrame(self.frame_chart)
         self.frame_bottom.setStyleSheet("background-color: rgba(255,255,255, 255)")
@@ -287,6 +292,7 @@ class Ui_XuanNiaoTR(QMainWindow):
         self.pushButton_send.setDefault(False)
         self.pushButton_send.setFlat(True)
         self.pushButton_send.setObjectName("pushButton_send")
+        # self.pushButton_send.clicked.connect(self.sending)  # 不在connect类中能触发的要放到UI中
         self.layout_bottom.addWidget(self.pushButton_send)
         self.layout_chart.addWidget(self.frame_bottom)
         self.layout_chart.setStretch(0, 21)
@@ -316,9 +322,33 @@ class Ui_XuanNiaoTR(QMainWindow):
         self.checkBox_connect.setText(_translate("XuanNiaoTR", "连接状态"))
         self.pushButton_send.setText(_translate("XuanNiaoTR", "发送"))
 
+    def mousePressEvent(self, e):
+        self.start_point = e.globalPos()
+        self.window_point = self.frameGeometry().topLeft()
 
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    win = Ui_XuanNiaoTR()
-    win.show()
-    app.exit(app.exec())
+    def mouseMoveEvent(self, e):
+        self.ismoving = True
+        relpos = e.globalPos() - self.start_point
+        self.move(self.window_point + relpos)
+
+    def mouseReleaseEvent(self, e):
+        if not self.ismoving:
+            self.close()
+        self.ismoving = False
+
+    @pyqtSlot()
+    def on_pushButton_setting_clicked(self):
+        self.getPath()
+
+    def getPath(self):
+        get_directory_path = QFileDialog.getExistingDirectory(
+            self, "选取指定文件夹", "D:/")
+        self.path = str(get_directory_path)
+
+    @pyqtSlot()
+    def on_pushButton_minimizeApp_clicked(self):
+        self.showMinimized()
+
+    @pyqtSlot()
+    def on_pushButton_closeApp_clicked(self):
+        self.close()

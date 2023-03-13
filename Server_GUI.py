@@ -1,14 +1,4 @@
-import re
 import sys
-import time
-import socket
-
-from PyQt5.QtCore import Qt, QPoint
-from PyQt5.QtGui import QMouseEvent
-
-import FileMark
-import threading
-from os import path
 from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.QtWidgets import QApplication, QMainWindow
 
@@ -45,16 +35,7 @@ class Ui_XuanNiaoTR(QMainWindow):
         self.layout_bottom = None
         self.pushButton_send = None
 
-        self.s = None
-        self.addr = None
-        self.client = None
-        self.receive_buffer = str()  # 接收区缓冲
-        self.send_buffer = str()  # 发送区缓冲
-        self.Server_ipv4 = self.get_host_auto()
-        self.Server_port = int(9999)
-        self.receive_str = None
-        self.send_str = None
-        self.ip = None
+        self.setupUi(self)
 
     def setupUi(self, XuanNiaoTR):
         XuanNiaoTR.setObjectName("XuanNiaoTR")
@@ -72,7 +53,8 @@ class Ui_XuanNiaoTR(QMainWindow):
         self.layout_title = QtWidgets.QHBoxLayout(self.frame_title)
         self.layout_title.setObjectName("layout_title")
         self.label_title = QtWidgets.QLabel(self.frame_title)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred, QtWidgets.QSizePolicy.Policy.Expanding)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Preferred, QtWidgets.QSizePolicy.Policy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.label_title.sizePolicy().hasHeightForWidth())
@@ -84,7 +66,8 @@ class Ui_XuanNiaoTR(QMainWindow):
         self.label_title.setStyleSheet("background-color: rgba(255,255,255, 0)")
         self.label_title.setObjectName("label_title")
         self.layout_title.addWidget(self.label_title)
-        spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Minimum)
+        spacerItem = QtWidgets.QSpacerItem(
+            40, 20, QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Minimum)
         self.layout_title.addItem(spacerItem)
         self.pushButton_setting = QtWidgets.QPushButton(self.frame_title)
         self.pushButton_setting.setStyleSheet("background-color: rgba(0, 0, 0, 0)")
@@ -106,13 +89,15 @@ class Ui_XuanNiaoTR(QMainWindow):
         self.pushButton_closeApp.setStyleSheet("background-color: rgba(0, 0, 0, 0)")
         self.pushButton_closeApp.setText("")
         icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap("image/icon/icon_close.png"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
+        icon2.addPixmap(
+            QtGui.QPixmap("image/icon/icon_close.png"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
         self.pushButton_closeApp.setIcon(icon2)
         self.pushButton_closeApp.setObjectName("pushButton_closeApp")
         self.layout_title.addWidget(self.pushButton_closeApp)
         self.verticalLayout_central.addWidget(self.frame_title)
         self.frame_main = QtWidgets.QFrame(self.widget_central)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred, QtWidgets.QSizePolicy.Policy.Preferred)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Preferred, QtWidgets.QSizePolicy.Policy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.frame_main.sizePolicy().hasHeightForWidth())
@@ -312,8 +297,10 @@ class Ui_XuanNiaoTR(QMainWindow):
         self.verticalLayout_central.setStretch(1, 24)
         XuanNiaoTR.setCentralWidget(self.widget_central)
 
+        # self.setAcceptDrops(True)  # 支持拖入操作
         self.retranslateUi(XuanNiaoTR)
         QtCore.QMetaObject.connectSlotsByName(XuanNiaoTR)
+        print("主界面创建完成")
 
     def retranslateUi(self, XuanNiaoTR):
         _translate = QtCore.QCoreApplication.translate
@@ -327,139 +314,9 @@ class Ui_XuanNiaoTR(QMainWindow):
         self.checkBox_connect.setText(_translate("XuanNiaoTR", "连接状态"))
         self.pushButton_send.setText(_translate("XuanNiaoTR", "发送"))
 
-    def check_connect(self):
-        print("状态改变")
-        status = self.checkBox_connect.isChecked()
-        if status:
-            self.connect()
-            print("已连接")
-
-    # 自动获取本机host
-    def get_host_auto(self):
-        # 函数 gethostname() 返回当前正在执行 Python 的系统主机名
-        host = str(socket.gethostbyname(socket.gethostname()))
-        return host
-
-    # 建立连接
-    def connect(self):
-        self.s = socket.socket()
-        host = self.get_host_auto()
-        self.s.bind((host, self.Server_port))
-        self.s.listen(1)
-        self.browser_chart.append('等待手机接入...\n')
-        self.client, self.addr = self.s.accept()
-        self.browser_chart.append(time.strftime('%H:%M:%S') + ' 连接手机IP为'
-                                 + str(self.addr[0]) + '手机端口' + str(self.addr[1]) + '\n\n')
-        try:
-            self.receiving()
-        except Exception as e:
-            print(e)
-        return
-
-    # 发送数据
-    def send_data(self):
-        if self.entry_send.text() is not None:
-            send_text = self.entry_send.text()
-            mark = FileMark.check(send_text)
-            if mark == 1:
-                file_path = str(FileMark.fpath(send_text))
-                file_name = str(FileMark.name(file_path))
-                file_len = str(path.getsize(file_path))
-                file_head = str("@FMark@"+file_name+"@FName@"+file_len+"@FLen@")
-                # file_head = file_head.ljust(1008, "0")
-                print(file_head+"\n", len(file_head))
-                self.client.send(bytes(file_head.encode("utf-8")))
-                print("文件信息已发送")
-                time.sleep(0.3)
-                f = open(file_path, 'rb')
-                while 1:
-                    data = f.read(1024)
-                    if data is None:
-                        print("指定路径没有找到文件"+(path.basename(file_path)))
-                        break
-                    self.client.send(data)
-                    f.flush()
-                f.close()
-            else:
-                # 特别注意：数据的结尾加上换行符才可让客户端的readline()停止阻塞
-                self.client.send(bytes(send_text, 'utf-8'))
-                self.browser_chart.append(time.strftime('%H:%M:%S') + ' 服务器:\n' + self.send_buffer + '\n\n')
-        return
-
-    # 接收数据
-    def receive_data(self):
-        while True:
-            try:
-                self.input_stream = self.client.recv(1024)
-                print(self.input_stream)
-                self.receive_buffer = str(self.input_stream, 'utf8')
-                msg_type = re.search(r"@\wMark@", self.receive_buffer, re.MULTILINE)
-                if self.receive_buffer != "":
-                    print(self.receive_buffer)
-                    if self.receive_buffer == "@EndMark@\n":
-                        self.browser_chart.append(time.strftime('%H:%M:%S') + ' 手机端:断开连接' + '\n\n')
-                    # 用正则表达式判定接收内容是“断开”、“消息”还是“文件”
-                    elif msg_type is not None:
-                        print(msg_type.group(0))
-                        # 传输类型为文件
-                        if msg_type.group(0) == "@FMark@":
-                            # server_head_msg = json.loads(self.client.recv(1024))
-                            file_name = re.findall(r"@FMark@(.*)@FName@", self.receive_buffer, re.M)[0]
-                            self.browser_chart.append(time.strftime('%H:%M:%S') + '手机端:\n' + str(file_name))
-                            print(file_name)
-                            file_path = 'E:/test/'
-                            file_len = int(re.findall(r"@FName@(.*)@FLen@", self.receive_buffer, re.M)[0])
-                            print(file_len)
-
-                            f = open(file_path + file_name, "wb")
-                            recv_len = 0
-                            while recv_len < file_len:
-                                if file_len - recv_len > 1024:
-                                    length = 1024
-                                else:
-                                    length = file_len - recv_len
-                                data = self.client.recv(length)
-                                print(str(data), 'utf-8')
-                                data_len = len(data)
-                                recv_len += data_len
-                                print("已接收：", int(recv_len/file_len*100), "%")
-                                f.write(data)
-                            f.close()
-                            self.client.send(bytes("接收到：" + file_name, 'utf8'))
-                    else:
-                        self.receive_str = self.receive_buffer
-                        self.browser_chart.insertPlainText(
-                            time.strftime('%H:%M:%S') + ' 客户端:\n' + self.receive_str + '\n')
-            except Exception as e:
-                print(e)
-
-    # connecting(),sending()和receiving()分别开启一个线程
-    def connecting(self):
-        threading.Thread(target=self.connect).start()
-        return
-
-    def sending(self):
-        threading.Thread(target=self.send_data).start()
-        return
-
-    def receiving(self):
-        sleep_time = 5
-        t_r = threading.Thread(target=self.receive_data(), args=(sleep_time,))
-        t_r.setDaemon(True)
-        t_r.start()
-
-
-class MainWindow(QMainWindow):
-    def __init__(self):
-        super().__init__()
-        self.__ui = Ui_XuanNiaoTR()
-        self.setWindowFlags(Qt.FramelessWindowHint)
-        self.__ui.setupUi(self)
-        self.setWindowTitle('玄鸟快传')  # 设置窗口标题要在窗口ui创建之后
-
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    win = MainWindow()
+    win = Ui_XuanNiaoTR()
     win.show()
     app.exit(app.exec())

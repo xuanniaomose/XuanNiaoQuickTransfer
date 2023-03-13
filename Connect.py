@@ -36,11 +36,11 @@ class Connect(Ui_XuanNiaoTR):
         self.checkBox_connect.stateChanged.connect(self.check_connect)
         self.entry_send.setAcceptDrops(True)  # 支持拖入操作
         self.entry_send.setDragEnabled(True)  # 支持拽出操作
-        # self.entry_send.installEventFilter(QEditDropHandler(self))  # 这句要放Ui里
+        self.entry_send.returnPressed.connect(self.sending)
+        self.entry_send.installEventFilter(QEditDropHandler(self))  # 这句要放Ui里
         self.pushButton_send.clicked.connect(self.sending)
         self.lineEdit_ipv4.editingFinished.connect(self.lineEdit_ipv4.update)
         self.connecting()
-
 
     def check_connect(self):
         print("状态改变")
@@ -82,7 +82,6 @@ class Connect(Ui_XuanNiaoTR):
                 file_name = str(FileMark.name(file_path))
                 file_len = str(path.getsize(file_path))
                 file_head = str("@FMark@" + file_name + "@FName@" + file_len + "@FLen@")
-                # file_head = file_head.ljust(1008, "0")
                 print(file_head + "\n", len(file_head))
                 self.client.send(bytes(file_head.encode("utf-8")))
                 print("文件信息已发送")
@@ -121,7 +120,6 @@ class Connect(Ui_XuanNiaoTR):
                         print(msg_type.group(0))
                         # 传输类型为文件
                         if msg_type.group(0) == "@FMark@":
-                            # server_head_msg = json.loads(self.client.recv(1024))
                             file_name = re.findall(r"@FMark@(.*)@FName@", self.receive_buffer, re.M)[0]
                             self.browser_chart.append(time.strftime('%H:%M:%S') + '手机端:\n' + str(file_name))
                             print(file_name)

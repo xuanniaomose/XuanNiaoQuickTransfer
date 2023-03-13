@@ -1,10 +1,6 @@
-import sys
 from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.QtCore import pyqtSlot
-from PyQt5.QtGui import QCursor
-from PyQt5.QtWidgets import QApplication, QMainWindow, QInputDialog, QFileDialog
-
-from QEditDropHandler import QEditDropHandler
+from PyQt5.QtWidgets import QMainWindow, QFileDialog
 
 
 class Ui_XuanNiaoTR(QMainWindow):
@@ -39,6 +35,9 @@ class Ui_XuanNiaoTR(QMainWindow):
         self.layout_bottom = None
         self.pushButton_send = None
 
+        self.start_point = None
+        self.window_point = None
+        self.ismoving = None
         self.path = None
 
         self.setupUi(self)
@@ -244,10 +243,8 @@ class Ui_XuanNiaoTR(QMainWindow):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.entry_send.sizePolicy().hasHeightForWidth())
         self.entry_send.setSizePolicy(sizePolicy)
-        self.entry_send.installEventFilter(QEditDropHandler(self))
         self.entry_send.setStyleSheet("border: none;")
         self.entry_send.setObjectName("entry_send")
-        self.entry_send.returnPressed.connect(self.sending)
         self.layout_chart.addWidget(self.entry_send)
         self.frame_bottom = QtWidgets.QFrame(self.frame_chart)
         self.frame_bottom.setStyleSheet("background-color: rgba(255,255,255, 255)")
@@ -274,8 +271,7 @@ class Ui_XuanNiaoTR(QMainWindow):
             "    background-repeat: no-repeat;\n"
             "    background-color: rgb(122,211,255);\n"
             "    border: none;\n"
-            "    border-top-left-radius: 9px;\n"
-            "    border-top-right-radius: 9px;\n"
+            "    border-radius: 8px;\n"
             "    border-left: 15px solid transparent;\n"
             "    border-right: 15px solid transparent;\n"
             "    text-align: center;\n"
@@ -292,7 +288,7 @@ class Ui_XuanNiaoTR(QMainWindow):
         self.pushButton_send.setDefault(False)
         self.pushButton_send.setFlat(True)
         self.pushButton_send.setObjectName("pushButton_send")
-        # self.pushButton_send.clicked.connect(self.sending)  # 不在connect类中能触发的要放到UI中
+        # self.pushButton_send.clicked.connect(self.sending)  # 在connect类中不能触发的要放到Ui中
         self.layout_bottom.addWidget(self.pushButton_send)
         self.layout_chart.addWidget(self.frame_bottom)
         self.layout_chart.setStretch(0, 21)
@@ -342,7 +338,7 @@ class Ui_XuanNiaoTR(QMainWindow):
 
     def getPath(self):
         get_directory_path = QFileDialog.getExistingDirectory(
-            self, "选取指定文件夹", "D:/")
+            self, "请指定文件存储路径", "D:/")
         self.path = str(get_directory_path)
 
     @pyqtSlot()

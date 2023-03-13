@@ -2,6 +2,8 @@ import sys
 from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.QtWidgets import QApplication, QMainWindow
 
+from QEditDropHandler import QEditDropHandler
+
 
 class Ui_XuanNiaoTR(QMainWindow):
     def __init__(self):
@@ -238,6 +240,7 @@ class Ui_XuanNiaoTR(QMainWindow):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.entry_send.sizePolicy().hasHeightForWidth())
         self.entry_send.setSizePolicy(sizePolicy)
+        self.entry_send.installEventFilter(QEditDropHandler(self))
         self.entry_send.setStyleSheet("border: none;")
         self.entry_send.setObjectName("entry_send")
         self.layout_chart.addWidget(self.entry_send)
@@ -297,7 +300,6 @@ class Ui_XuanNiaoTR(QMainWindow):
         self.verticalLayout_central.setStretch(1, 24)
         XuanNiaoTR.setCentralWidget(self.widget_central)
 
-        # self.setAcceptDrops(True)  # 支持拖入操作
         self.retranslateUi(XuanNiaoTR)
         QtCore.QMetaObject.connectSlotsByName(XuanNiaoTR)
         print("主界面创建完成")

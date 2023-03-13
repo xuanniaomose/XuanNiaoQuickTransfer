@@ -37,12 +37,11 @@ class Connect(Ui_XuanNiaoTR):
         self.entry_send.setDragEnabled(True)  # 支持拽出操作
         self.entry_send.returnPressed.connect(self.sending)
         self.entry_send.returnPressed.connect(self.dragEnterEvent)
-        self.entry_send.installEventFilter(QEditDropHandler(self))
+        # self.entry_send.installEventFilter(QEditDropHandler(self))  # 这句要放Ui里
         self.pushButton_send.clicked.connect(self.sending)
         self.pushButton_send.clicked.connect(self.entry_send.update)
         self.lineEdit_ipv4.editingFinished.connect(self.lineEdit_ipv4.update)
 
-        self.setAcceptDrops(True)  # 支持拖入操作
         self.connecting()
 
     def check_connect(self):
@@ -79,6 +78,7 @@ class Connect(Ui_XuanNiaoTR):
         if self.entry_send.text() is not None:
             send_text = self.entry_send.text()
             mark = FileMark.check(send_text)
+            print("触发发送2")
             if mark == 1:
                 file_path = str(FileMark.fpath(send_text))
                 file_name = str(FileMark.name(file_path))
@@ -101,6 +101,7 @@ class Connect(Ui_XuanNiaoTR):
             else:
                 # 特别注意：数据的结尾加上换行符才可让客户端的readline()停止阻塞
                 self.client.send(bytes(send_text, 'utf-8'))
+                print("触发发送3")
                 self.browser_chart.append(time.strftime('%H:%M:%S') + ' 服务器:\n' + self.send_buffer + '\n\n')
         return
 
@@ -158,6 +159,7 @@ class Connect(Ui_XuanNiaoTR):
 
     def sending(self):
         threading.Thread(target=self.send_data).start()
+        print("触发发送1")
         return
 
     def receiving(self):

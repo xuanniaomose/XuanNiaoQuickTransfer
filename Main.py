@@ -12,7 +12,7 @@ class MainWindow(QMainWindow):
         self.__ui = Connect()
         # self.setWindowFlags(Qt.FramelessWindowHint)
         self.__ui.setupUi(self)
-        # self.setWindowTitle('玄鸟快传')  # 设置窗口标题要在窗口ui创建之后
+        self.setWindowTitle('玄鸟快传')  # 设置窗口标题要在窗口ui创建之后
 
 
 if __name__ == '__main__':

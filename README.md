@@ -1,6 +1,6 @@
 # 玄鸟快传XuanNiaoQuickTransfer_forWindows
 
-v0.7 2023.3.13
+v0.8 2023.3.13
 更新了界面，增加了设定接收文件路径的方式
 
 v0.7 2023.3.4

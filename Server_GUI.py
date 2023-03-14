@@ -1,11 +1,15 @@
+import sys
+
 from PyQt5 import QtCore, QtWidgets, QtGui
-from PyQt5.QtCore import pyqtSlot
-from PyQt5.QtWidgets import QMainWindow, QFileDialog
+from PyQt5.QtCore import pyqtSlot, Qt
+from PyQt5.QtGui import QColor
+from PyQt5.QtWidgets import QMainWindow, QFileDialog, QApplication
 
 
 class Ui_XuanNiaoTR(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.effect_shadow = None
         self.widget_central = None
         self.verticalLayout_central = None
         self.frame_title = None
@@ -40,23 +44,49 @@ class Ui_XuanNiaoTR(QMainWindow):
 
     def setupUi(self, XuanNiaoTR):
         XuanNiaoTR.setObjectName("XuanNiaoTR")
-        XuanNiaoTR.resize(420, 600)
+        XuanNiaoTR.resize(425, 605)
+        XuanNiaoTR.setWindowFlags(Qt.FramelessWindowHint)
+        XuanNiaoTR.setAttribute(Qt.WA_TranslucentBackground)
         self.widget_central = QtWidgets.QWidget(XuanNiaoTR)
-        self.widget_central.setStyleSheet("")
+        self.widget_central.setAutoFillBackground(True)  # 让被包含窗口依然绘制背景
+        self.widget_central.setAttribute(Qt.WA_TranslucentBackground)
         self.widget_central.setObjectName("widget_central")
         self.verticalLayout_central = QtWidgets.QVBoxLayout(self.widget_central)
-        self.verticalLayout_central.setContentsMargins(0, 0, 0, 0)
-        self.verticalLayout_central.setSpacing(0)
+        self.verticalLayout_central.setContentsMargins(5, 5, 5, 5)
+        self.verticalLayout_central.setSpacing(5)
         self.verticalLayout_central.setObjectName("verticalLayout_central")
-        self.frame_title = QtWidgets.QFrame(self.widget_central)
-        self.frame_title.setStyleSheet("background-color: rgba(122,211,255, 180)")
+        self.frame_main = QtWidgets.QFrame(self.widget_central)
+        self.effect_shadow = QtWidgets.QGraphicsDropShadowEffect(self)
+        self.effect_shadow.setOffset(0, 0)  # 偏移
+        self.effect_shadow.setBlurRadius(10)  # 阴影半径
+        self.effect_shadow.setColor(QColor("#444444"))  # 阴影颜色
+        self.widget_central.setGraphicsEffect(self.effect_shadow)  # 将设置套用到widget窗口中
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.frame_main.sizePolicy().hasHeightForWidth())
+        self.frame_main.setSizePolicy(sizePolicy)
+        self.frame_main.setStyleSheet("background-color: rgb(255,255,255)")
+        self.frame_main.setObjectName("frame_main")
+        self.layout_main = QtWidgets.QHBoxLayout(self.frame_main)
+        self.layout_main.setContentsMargins(0, 0, 0, 0)
+        self.layout_main.setSpacing(0)
+        self.layout_main.setObjectName("layout_main")
+        self.frame_chart = QtWidgets.QFrame(self.frame_main)
+        self.frame_chart.setObjectName("frame_chart")
+        self.layout_chart = QtWidgets.QVBoxLayout(self.frame_chart)
+        self.layout_chart.setContentsMargins(0, 0, 0, 0)
+        self.layout_chart.setSpacing(0)
+        self.layout_chart.setObjectName("layout_chart")
+        self.frame_title = QtWidgets.QFrame(self.frame_chart)
+        self.frame_title.setStyleSheet("background-color: rgb(122,211,255)")
         self.frame_title.setObjectName("frame_title")
         self.layout_title = QtWidgets.QHBoxLayout(self.frame_title)
         self.layout_title.setContentsMargins(9, 0, 9, 0)
+        self.layout_title.setSpacing(6)
         self.layout_title.setObjectName("layout_title")
         self.label_title = QtWidgets.QLabel(self.frame_title)
-        sizePolicy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Policy.Preferred, QtWidgets.QSizePolicy.Policy.Expanding)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.label_title.sizePolicy().hasHeightForWidth())
@@ -69,8 +99,7 @@ class Ui_XuanNiaoTR(QMainWindow):
         self.label_title.setStyleSheet("background-color: rgba(255,255,255, 0)")
         self.label_title.setObjectName("label_title")
         self.layout_title.addWidget(self.label_title)
-        spacerItem = QtWidgets.QSpacerItem(
-            40, 20, QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Minimum)
+        spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.layout_title.addItem(spacerItem)
         self.pushButton_setting = QtWidgets.QPushButton(self.frame_title)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
@@ -150,31 +179,13 @@ class Ui_XuanNiaoTR(QMainWindow):
         self.pushButton_closeApp.setIconSize(QtCore.QSize(20, 20))
         self.pushButton_closeApp.setObjectName("pushButton_closeApp")
         self.layout_title.addWidget(self.pushButton_closeApp)
-        self.verticalLayout_central.addWidget(self.frame_title)
-        self.frame_main = QtWidgets.QFrame(self.widget_central)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.frame_main.sizePolicy().hasHeightForWidth())
-        self.frame_main.setSizePolicy(sizePolicy)
-        self.frame_main.setObjectName("frame_main")
-        self.layout_main = QtWidgets.QHBoxLayout(self.frame_main)
-        self.layout_main.setContentsMargins(0, 0, 0, 0)
-        self.layout_main.setSpacing(0)
-        self.layout_main.setObjectName("layout_main")
-        self.frame_chart = QtWidgets.QFrame(self.frame_main)
-        self.frame_chart.setObjectName("frame_chart")
-        self.layout_chart = QtWidgets.QVBoxLayout(self.frame_chart)
-        self.layout_chart.setContentsMargins(0, 0, 0, 0)
-        self.layout_chart.setSpacing(0)
-        self.layout_chart.setObjectName("layout_chart")
+        self.layout_chart.addWidget(self.frame_title)
         self.textBrowser_chart = QtWidgets.QTextBrowser(self.frame_chart)
         self.textBrowser_chart.setStyleSheet("border: none;")
         self.textBrowser_chart.setObjectName("textBrowser_chart")
         self.layout_chart.addWidget(self.textBrowser_chart)
-
         self.frame_medium = QtWidgets.QFrame(self.frame_chart)
-        self.frame_medium.setStyleSheet("background-color: rgba(122,211,255, 180)")
+        self.frame_medium.setStyleSheet("background-color: rgb(122,211,255)")
         self.frame_medium.setObjectName("frame_medium")
         self.layout_medium = QtWidgets.QHBoxLayout(self.frame_medium)
         self.layout_medium.setObjectName("layout_medium")
@@ -236,7 +247,7 @@ class Ui_XuanNiaoTR(QMainWindow):
         self.lineEdit_send.setObjectName("lineEdit_send")
         self.layout_chart.addWidget(self.lineEdit_send)
         self.frame_bottom = QtWidgets.QFrame(self.frame_chart)
-        self.frame_bottom.setStyleSheet("background-color: rgba(255,255,255, 255)")
+        self.frame_bottom.setStyleSheet("background-color: rgb(255,255,255)")
         self.frame_bottom.setObjectName("frame_bottom")
         self.layout_bottom = QtWidgets.QHBoxLayout(self.frame_bottom)
         self.layout_bottom.setContentsMargins(0, 0, 0, 0)
@@ -269,14 +280,14 @@ class Ui_XuanNiaoTR(QMainWindow):
         # self.pushButton_send.clicked.connect(self.sending)  # 在connect类中不能触发的要放到Ui中
         self.layout_bottom.addWidget(self.pushButton_send)
         self.layout_chart.addWidget(self.frame_bottom)
-        self.layout_chart.setStretch(0, 20)
-        self.layout_chart.setStretch(1, 1)
-        self.layout_chart.setStretch(2, 9)
-        self.layout_chart.setStretch(3, 2)
+        self.layout_chart.setStretch(0, 3)
+        self.layout_chart.setStretch(1, 20)
+        self.layout_chart.setStretch(2, 1)
+        self.layout_chart.setStretch(3, 9)
+        self.layout_chart.setStretch(4, 2)
         self.layout_main.addWidget(self.frame_chart)
         self.verticalLayout_central.addWidget(self.frame_main)
-        self.verticalLayout_central.setStretch(0, 1)
-        self.verticalLayout_central.setStretch(1, 12)
+        self.verticalLayout_central.setStretch(0, 12)
         XuanNiaoTR.setCentralWidget(self.widget_central)
 
         self.retranslateUi(XuanNiaoTR)
@@ -325,3 +336,10 @@ class Ui_XuanNiaoTR(QMainWindow):
     @pyqtSlot()
     def on_pushButton_closeApp_clicked(self):
         self.close()
+
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    win = Ui_XuanNiaoTR()
+    win.show()
+    app.exit(app.exec())

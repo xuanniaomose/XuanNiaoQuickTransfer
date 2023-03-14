@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MainWindow</class>
- <widget class="QMainWindow" name="MainWindow">
+ <class>XuanNiaoTR</class>
+ <widget class="QMainWindow" name="XuanNiaoTR">
+  <property name="windowModality">
+   <enum>Qt::NonModal</enum>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -13,11 +16,11 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
-  <widget class="QWidget" name="centralwidget">
+  <widget class="QWidget" name="widget_central">
    <property name="styleSheet">
     <string notr="true"/>
    </property>
-   <layout class="QVBoxLayout" name="verticalLayout_2" stretch="1,24">
+   <layout class="QVBoxLayout" name="verticalLayout_central" stretch="1,12">
     <property name="spacing">
      <number>0</number>
     </property>
@@ -34,13 +37,28 @@
      <number>0</number>
     </property>
     <item>
-     <widget class="QFrame" name="atitleframe">
+     <widget class="QFrame" name="frame_title">
       <property name="styleSheet">
        <string notr="true">background-color: rgba(122,211,255, 180)</string>
       </property>
-      <layout class="QHBoxLayout" name="titleLayout">
+      <layout class="QHBoxLayout" name="layout_title">
+       <property name="spacing">
+        <number>6</number>
+       </property>
+       <property name="leftMargin">
+        <number>9</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>9</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
        <item>
-        <widget class="QLabel" name="label_titile">
+        <widget class="QLabel" name="label_title">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
            <horstretch>0</horstretch>
@@ -63,7 +81,7 @@
         </widget>
        </item>
        <item>
-        <spacer name="horizontalSpacer">
+        <spacer name="horizontalSpacer_title">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
@@ -76,44 +94,128 @@
         </spacer>
        </item>
        <item>
-        <widget class="QPushButton" name="pushButton_minimizeApp_2">
+        <widget class="QPushButton" name="pushButton_setting">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>25</width>
+           <height>0</height>
+          </size>
+         </property>
          <property name="styleSheet">
-          <string notr="true">background-color: rgba(0, 0, 0, 0)</string>
+          <string notr="true">QPushButton {	
+	background-color: rgba(0,0,0,0);
+	border:  none
+}
+QPushButton:hover {
+	background-color: rgb(193,229,255);
+}
+QPushButton:pressed {	
+	background-color: rgb(245,245,255);
+	color: rgb(255, 255, 255);
+}</string>
          </property>
          <property name="text">
           <string/>
          </property>
          <property name="icon">
           <iconset>
-           <normaloff>image/icon/icon_settings.png</normaloff>image/icon/icon_settings.png</iconset>
+           <normaloff>icon/icon_setting.png</normaloff>icon/icon_setting.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QPushButton" name="pushButton_minimizeApp">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>25</width>
+           <height>0</height>
+          </size>
+         </property>
          <property name="styleSheet">
-          <string notr="true">background-color: rgba(0, 0, 0, 0)</string>
+          <string notr="true">QPushButton {	
+	background-color: rgba(0,0,0,0);
+	border: none
+}
+QPushButton:hover {
+	background-color: rgb(193,229,255);
+}
+QPushButton:pressed {	
+	background-color: rgb(245,245,255);
+	color: rgb(255, 255, 255);
+}</string>
          </property>
          <property name="text">
           <string/>
          </property>
          <property name="icon">
           <iconset>
-           <normaloff>image/icon/icon_minimize.png</normaloff>image/icon/icon_minimize.png</iconset>
+           <normaloff>icon/icon_minimize.png</normaloff>icon/icon_minimize.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QPushButton" name="pushButton_closeApp">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>25</width>
+           <height>0</height>
+          </size>
+         </property>
          <property name="styleSheet">
-          <string notr="true">background-color: rgba(0, 0, 0, 0)</string>
+          <string notr="true">QPushButton {	
+	background-color: rgba(0,0,0,0);
+	border: none
+}
+QPushButton:hover {
+	background-color: rgb(193,229,255);
+}
+QPushButton:pressed {	
+	background-color: rgb(245,245,255);
+	color: rgb(255, 255, 255);
+}</string>
          </property>
          <property name="text">
           <string/>
          </property>
          <property name="icon">
           <iconset>
-           <normaloff>image/icon/icon_close.png</normaloff>image/icon/icon_close.png</iconset>
+           <normaloff>icon/icon_close.png</normaloff>icon/icon_close.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
          </property>
         </widget>
        </item>
@@ -121,14 +223,14 @@
      </widget>
     </item>
     <item>
-     <widget class="QFrame" name="mainframe">
+     <widget class="QFrame" name="frame_main">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
-      <layout class="QHBoxLayout" name="mainLayout" stretch="10">
+      <layout class="QHBoxLayout" name="layout_main" stretch="0">
        <property name="spacing">
         <number>0</number>
        </property>
@@ -145,8 +247,8 @@
         <number>0</number>
        </property>
        <item>
-        <widget class="QFrame" name="chartframe">
-         <layout class="QVBoxLayout" name="chartlayout" stretch="21,1,9,2">
+        <widget class="QFrame" name="frame_chart">
+         <layout class="QVBoxLayout" name="layout_chart" stretch="20,1,9,2">
           <property name="spacing">
            <number>0</number>
           </property>
@@ -163,105 +265,21 @@
            <number>0</number>
           </property>
           <item>
-           <widget class="QScrollArea" name="scrollArea">
+           <widget class="QTextBrowser" name="textBrowser_chart">
             <property name="styleSheet">
-             <string notr="true">border:none;</string>
+             <string notr="true">border: none;</string>
             </property>
-            <property name="widgetResizable">
-             <bool>true</bool>
+            <property name="verticalScrollBarPolicy">
+             <enum>Qt::ScrollBarAsNeeded</enum>
             </property>
-            <widget class="QWidget" name="scrollAreaWidgetContents">
-             <property name="geometry">
-              <rect>
-               <x>0</x>
-               <y>0</y>
-               <width>420</width>
-               <height>341</height>
-              </rect>
-             </property>
-             <property name="styleSheet">
-              <string notr="true"/>
-             </property>
-             <layout class="QHBoxLayout" name="horizontalLayout">
-              <property name="spacing">
-               <number>0</number>
-              </property>
-              <property name="leftMargin">
-               <number>0</number>
-              </property>
-              <property name="topMargin">
-               <number>0</number>
-              </property>
-              <property name="rightMargin">
-               <number>0</number>
-              </property>
-              <property name="bottomMargin">
-               <number>0</number>
-              </property>
-              <item>
-               <widget class="QTextBrowser" name="chartbrowser">
-                <property name="styleSheet">
-                 <string notr="true"/>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QScrollBar" name="verticalScrollBar">
-                <property name="autoFillBackground">
-                 <bool>false</bool>
-                </property>
-                <property name="styleSheet">
-                 <string notr="true">QScrollBar:vertical {
-	border: none;
-    background: rgb(240, 248, 255);
-    width: 12px;
-    margin: 10px 0 10px 0;
- }
-QScrollBar::handle:vertical {	
-	background: rgb(100,211,255);
-    min-height: 45px;
-	border-radius: 5px
- }
-QScrollBar::add-line:vertical {
-    border: none;
-    background: rgb(193,229,255);
-    height: 20px;
-    subcontrol-position: bottom;
-    subcontrol-origin: margin;
- }
-QScrollBar::sub-line:vertical {
-	border: none;
-    background: rgb(193,229,255);
-    height: 20px;
-	border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-    subcontrol-position: top;
-    subcontrol-origin: margin;
- }
-QScrollBar::up-arrow:vertical, 
-QScrollBar::down-arrow:vertical {
-     background: none;
- }
-QScrollBar::add-page:vertical,
-QScrollBar::sub-page:vertical {
-     background: none;
- }</string>
-                </property>
-                <property name="orientation">
-                 <enum>Qt::Vertical</enum>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </widget>
            </widget>
           </item>
           <item>
-           <widget class="QFrame" name="medium_frame">
+           <widget class="QFrame" name="frame_medium">
             <property name="styleSheet">
              <string notr="true">background-color: rgba(122,211,255, 180)</string>
             </property>
-            <layout class="QHBoxLayout" name="medium_layout">
+            <layout class="QHBoxLayout" name="layout_medium">
              <property name="rightMargin">
               <number>9</number>
              </property>
@@ -348,7 +366,7 @@ QScrollBar::sub-page:vertical {
               </widget>
              </item>
              <item>
-              <spacer name="horizontalSpacer_2">
+              <spacer name="horizontalSpacer_medium">
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
                </property>
@@ -380,7 +398,7 @@ QScrollBar::sub-page:vertical {
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="s_entry">
+           <widget class="QLineEdit" name="lineEdit_send">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
               <horstretch>0</horstretch>
@@ -393,11 +411,11 @@ QScrollBar::sub-page:vertical {
            </widget>
           </item>
           <item>
-           <widget class="QFrame" name="bottom_frame">
+           <widget class="QFrame" name="frame_bottom">
             <property name="styleSheet">
              <string notr="true">background-color: rgba(255,255,255, 255)</string>
             </property>
-            <layout class="QHBoxLayout" name="bottom_layout">
+            <layout class="QHBoxLayout" name="layout_bottom">
              <property name="spacing">
               <number>0</number>
              </property>
@@ -414,7 +432,7 @@ QScrollBar::sub-page:vertical {
               <number>0</number>
              </property>
              <item>
-              <spacer name="horizontalSpacer_3">
+              <spacer name="horizontalSpacer_bottom">
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
                </property>
@@ -429,14 +447,14 @@ QScrollBar::sub-page:vertical {
              <item>
               <widget class="QPushButton" name="pushButton_send">
                <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
+                <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
                <property name="minimumSize">
                 <size>
-                 <width>35</width>
+                 <width>75</width>
                  <height>0</height>
                 </size>
                </property>
@@ -445,19 +463,8 @@ QScrollBar::sub-page:vertical {
                </property>
                <property name="styleSheet">
                 <string notr="true">QPushButton {	
-	background-position: left center;
-	background-repeat: no-repeat;
 	background-color: rgb(122,211,255);
-	border: none;
-	border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
-	border-bottom-left-radius: 10px;
-    border-bottom-right-radius: 10px;
-	border-left: 15px solid transparent;
-	border-right: 15px solid transparent;
-	text-align: center;
-	padding-left: 15px;
-	padding-right: 15px
+	border-radius: 4px;
 }
 QPushButton:hover {
 	background-color: rgb(193,229,255);

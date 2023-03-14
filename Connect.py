@@ -29,15 +29,15 @@ class Connect(Ui_XuanNiaoTR):
         self.send_str = None
         self.ip = None
 
-        self.browser_chart.append(self.receive_str)
+        self.textBrowser_chart.append(self.receive_str)
         self.lineEdit_ipv4.setText(self.Server_ipv4)
         self.lineEdit_ipv4.setReadOnly(True)
         self.Server_port = int(self.lineEdit_port.text())
         self.checkBox_connect.stateChanged.connect(self.check_connect)
-        self.entry_send.setAcceptDrops(True)  # 支持拖入操作
-        self.entry_send.setDragEnabled(True)  # 支持拽出操作
-        self.entry_send.returnPressed.connect(self.sending)
-        self.entry_send.installEventFilter(QEditDropHandler(self))  # 这句要放Ui里
+        self.lineEdit_send.setAcceptDrops(True)  # 支持拖入操作
+        self.lineEdit_send.setDragEnabled(True)  # 支持拽出操作
+        self.lineEdit_send.returnPressed.connect(self.sending)
+        self.lineEdit_send.installEventFilter(QEditDropHandler(self))  # 这句要放Ui里
         self.pushButton_send.clicked.connect(self.sending)
         self.lineEdit_ipv4.editingFinished.connect(self.lineEdit_ipv4.update)
         self.connecting()
@@ -61,9 +61,11 @@ class Connect(Ui_XuanNiaoTR):
         host = self.get_host_auto()
         self.s.bind((host, self.Server_port))
         self.s.listen(1)
-        self.browser_chart.append('等待手机接入...\n')
+        # Cannot queue arguments of type 'QTextCursor'↓
+        # Make sure 'QTextCursor' is registered using qRegisterMetaType().↓
+        self.textBrowser_chart.append('等待手机接入...\n')
         self.client, self.addr = self.s.accept()
-        self.browser_chart.append(time.strftime('%H:%M:%S') + ' 连接手机IP为' +
+        self.textBrowser_chart.append(time.strftime('%H:%M:%S') + ' 连接手机IP为' +
                                   str(self.addr[0]) + '手机端口' + str(self.addr[1]) + '\n\n')
         try:
             self.receiving()
@@ -73,8 +75,8 @@ class Connect(Ui_XuanNiaoTR):
 
     # 发送数据
     def send_data(self):
-        if self.entry_send.text() is not None:
-            send_text = self.entry_send.text()
+        if self.lineEdit_send.text() is not None:
+            send_text = self.lineEdit_send.text()
             mark = FileMark.check(send_text)
             print("触发发送2"+send_text)
             if mark == 1:
@@ -99,8 +101,8 @@ class Connect(Ui_XuanNiaoTR):
                 # 特别注意：数据的结尾加上换行符才可让客户端的readline()停止阻塞
                 self.client.send(bytes(send_text, 'utf-8'))
                 print("触发发送3"+send_text)
-                self.browser_chart.append(time.strftime('%H:%M:%S') + ' 服务器:\n' + send_text + '\n\n')
-            self.entry_send.clear()
+                self.textBrowser_chart.append(time.strftime('%H:%M:%S') + ' 服务器:\n' + send_text + '\n\n')
+            self.lineEdit_send.clear()
         return
 
     # 接收数据
@@ -114,14 +116,14 @@ class Connect(Ui_XuanNiaoTR):
                 if self.receive_buffer != "":
                     print(self.receive_buffer)
                     if self.receive_buffer == "@EndMark@\n":
-                        self.browser_chart.append(time.strftime('%H:%M:%S') + ' 手机端:断开连接' + '\n\n')
+                        self.textBrowser_chart.append(time.strftime('%H:%M:%S') + ' 手机端:断开连接' + '\n\n')
                     # 用正则表达式判定接收内容是“断开”、“消息”还是“文件”
                     elif msg_type is not None:
                         print(msg_type.group(0))
                         # 传输类型为文件
                         if msg_type.group(0) == "@FMark@":
                             file_name = re.findall(r"@FMark@(.*)@FName@", self.receive_buffer, re.M)[0]
-                            self.browser_chart.append(time.strftime('%H:%M:%S') + '手机端:\n' + str(file_name))
+                            self.textBrowser_chart.append(time.strftime('%H:%M:%S') + '手机端:\n' + str(file_name))
                             print(file_name)
                             file_path = self.path
                             file_len = int(re.findall(r"@FName@(.*)@FLen@", self.receive_buffer, re.M)[0])
@@ -144,7 +146,7 @@ class Connect(Ui_XuanNiaoTR):
                             self.client.send(bytes("接收到：" + file_name, 'utf8'))
                     else:
                         self.receive_str = self.receive_buffer
-                        self.browser_chart.insertPlainText(
+                        self.textBrowser_chart.insertPlainText(
                             time.strftime('%H:%M:%S') + ' 客户端:\n' + self.receive_str + '\n')
             except Exception as e:
                 print(e)

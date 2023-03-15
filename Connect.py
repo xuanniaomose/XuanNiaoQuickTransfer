@@ -4,6 +4,7 @@ import time
 import socket
 
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QTextCursor
 from PyQt5.QtWidgets import QApplication
 
 import FileMark
@@ -103,6 +104,10 @@ class Connect(Ui_XuanNiaoTR):
                 print("触发发送3"+send_text)
                 self.textBrowser_chart.append(time.strftime('%H:%M:%S') + ' 服务器:\n' + send_text + '\n\n')
             self.lineEdit_send.clear()
+            # 移动textBrowser_chart到最后
+            cursor = self.textBrowser_chart.textCursor()
+            cursor.movePosition(QTextCursor.End)
+            self.textBrowser_chart.setTextCursor(cursor)
         return
 
     # 接收数据
@@ -148,6 +153,10 @@ class Connect(Ui_XuanNiaoTR):
                         self.receive_str = self.receive_buffer
                         self.textBrowser_chart.insertPlainText(
                             time.strftime('%H:%M:%S') + ' 客户端:\n' + self.receive_str + '\n')
+                    # 移动textBrowser_chart到最后
+                    cursor = self.textBrowser_chart.textCursor()
+                    cursor.movePosition(QTextCursor.End)
+                    self.textBrowser_chart.setTextCursor(cursor)
             except Exception as e:
                 print(e)
 

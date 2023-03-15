@@ -183,6 +183,40 @@ class Ui_XuanNiaoTR(QMainWindow):
         self.textBrowser_chart = QtWidgets.QTextBrowser(self.frame_chart)
         self.textBrowser_chart.setStyleSheet("border: none;")
         self.textBrowser_chart.setObjectName("textBrowser_chart")
+        self.textBrowser_chart.verticalScrollBar().setStyleSheet(
+            "QScrollBar:vertical {\n"
+            "    border: none;\n"
+            "    background: rgb(240, 248, 255);\n"
+            "    width: 12px;\n"
+            "    margin: 10px 0 10px 0;\n"
+            " }\n"
+            "QScrollBar::handle:vertical {    \n"
+            "    background: rgb(100,211,255);\n"
+            "    min-height: 50px;\n"
+            "    border-radius: 5px\n"
+            " }\n"
+            "QScrollBar::add-line:vertical {\n"
+            "    border: none;\n"
+            "    background: rgb(193,229,255);\n"
+            "    height: 10px;\n"
+            "    subcontrol-position: bottom;\n"
+            "    subcontrol-origin: margin;\n"
+            " }\n"
+            "QScrollBar::sub-line:vertical {\n"
+            "    border: none;\n"
+            "    background: rgb(193,229,255);\n"
+            "    height: 10px;\n"
+            "    subcontrol-position: top;\n"
+            "    subcontrol-origin: margin;\n"
+            " }\n"
+            "QScrollBar::up-arrow:vertical, \n"
+            "QScrollBar::down-arrow:vertical {\n"
+            "     background: none;\n"
+            " }\n"
+            "QScrollBar::add-page:vertical,\n"
+            "QScrollBar::sub-page:vertical {\n"
+            "     background: none;\n"
+            " }")
         self.layout_chart.addWidget(self.textBrowser_chart)
         self.frame_medium = QtWidgets.QFrame(self.frame_chart)
         self.frame_medium.setStyleSheet("background-color: rgb(122,211,255)")

@@ -43,6 +43,41 @@ class Connect(Ui_XuanNiaoTR):
         self.lineEdit_ipv4.editingFinished.connect(self.lineEdit_ipv4.update)
         self.connecting()
 
+    def add_content(self, bubble, send, file, file_name=None, text=None):
+        if bubble:
+            return
+        else:
+            # 发送
+            if send:
+                color = "<font color='blue'>"
+                if file:
+                    self.textBrowser_chart.append(
+                        color + time.strftime('%H:%M:%S') + ' 电脑端发送文件:' + "<font>")
+                    self.textBrowser_chart.append(
+                        color + file_name + "<font>")
+                else:
+                    self.textBrowser_chart.append(
+                        color + time.strftime('%H:%M:%S') + ' 电脑端:' + "<font>")
+                    self.textBrowser_chart.append(color + text + "<font>")
+            # 接收
+            else:
+                color = "<font color='green'>"
+                if file:
+                    self.textBrowser_chart.append(
+                        color + time.strftime('%H:%M:%S') + ' 接收客户端文件:' + "<font>")
+                    self.textBrowser_chart.append(
+                        color + str(file_name) + "<font>")
+                else:
+                    self.textBrowser_chart.append(
+                        color + time.strftime('%H:%M:%S') + ' 客户端:' + "<font>")
+                    self.textBrowser_chart.append(
+                        color + text + "<font>")
+            self.textBrowser_chart.append('\n')
+            # 移动textBrowser_chart到最后
+            cursor = self.textBrowser_chart.textCursor()
+            cursor.movePosition(QTextCursor.End)
+            self.textBrowser_chart.setTextCursor(cursor)
+
     def check_connect(self):
         print("状态改变")
         status = self.checkBox_connect.isChecked()
@@ -67,7 +102,7 @@ class Connect(Ui_XuanNiaoTR):
         self.textBrowser_chart.append('等待手机接入...\n')
         self.client, self.addr = self.s.accept()
         self.textBrowser_chart.append(time.strftime('%H:%M:%S') + ' 连接手机IP为' +
-                                  str(self.addr[0]) + '手机端口' + str(self.addr[1]) + '\n\n')
+                                      str(self.addr[0]) + '手机端口' + str(self.addr[1]) + '\n\n')
         try:
             self.receiving()
         except Exception as e:
@@ -79,7 +114,6 @@ class Connect(Ui_XuanNiaoTR):
         if self.lineEdit_send.text() is not None:
             send_text = self.lineEdit_send.text()
             mark = FileMark.check(send_text)
-            print("触发发送2"+send_text)
             if mark == 1:
                 file_path = str(FileMark.fpath(send_text))
                 file_name = str(FileMark.name(file_path))
@@ -87,13 +121,16 @@ class Connect(Ui_XuanNiaoTR):
                 file_head = str("@FMark@" + file_name + "@FName@" + file_len + "@FLen@")
                 print(file_head + "\n", len(file_head))
                 self.client.send(bytes(file_head.encode("utf-8")))
+                self.add_content(False, True, True, file_name)
                 print("文件信息已发送")
                 time.sleep(0.3)
                 f = open(file_path, 'rb')
                 while 1:
                     data = f.read(1024)
                     if data is None:
-                        print("指定路径没有找到文件" + (path.basename(file_path)))
+                        self.textBrowser_chart.append(
+                            "<font color='blue'>" + time.strftime('%H:%M:%S')
+                            + "指定路径没有找到文件：" + (path.basename(file_path)) + "<font>")
                         break
                     self.client.send(data)
                     f.flush()
@@ -101,16 +138,9 @@ class Connect(Ui_XuanNiaoTR):
             else:
                 # 特别注意：数据的结尾加上换行符才可让客户端的readline()停止阻塞
                 self.client.send(bytes(send_text, 'utf-8'))
-                print("触发发送3"+send_text)
-                self.textBrowser_chart.append(
-                    "<font color='blue'>" + time.strftime('%H:%M:%S') + ' 电脑端:' + "<font>")
-                self.textBrowser_chart.append("<font color='blue'>" + send_text + "<font>")
-                self.textBrowser_chart.append('\n')
+                print("触发发送3" + send_text)
+                self.add_content(False, True, False, text=send_text)
             self.lineEdit_send.clear()
-            # 移动textBrowser_chart到最后
-            cursor = self.textBrowser_chart.textCursor()
-            cursor.movePosition(QTextCursor.End)
-            self.textBrowser_chart.setTextCursor(cursor)
         return
 
     # 接收数据
@@ -118,11 +148,11 @@ class Connect(Ui_XuanNiaoTR):
         while True:
             try:
                 self.input_stream = self.client.recv(1024)
-                print(self.input_stream)
+                # print(self.input_stream)
                 self.receive_buffer = str(self.input_stream, 'utf8')
                 msg_type = re.search(r"@\wMark@", self.receive_buffer, re.MULTILINE)
                 if self.receive_buffer != "":
-                    print(self.receive_buffer)
+                    # print(self.receive_buffer)
                     if self.receive_buffer == "@EndMark@\n":
                         self.textBrowser_chart.append(time.strftime('%H:%M:%S') + ' 手机端:断开连接' + '\n\n')
                     # 用正则表达式判定接收内容是“断开”、“消息”还是“文件”
@@ -131,12 +161,12 @@ class Connect(Ui_XuanNiaoTR):
                         # 传输类型为文件
                         if msg_type.group(0) == "@FMark@":
                             file_name = re.findall(r"@FMark@(.*)@FName@", self.receive_buffer, re.M)[0]
-                            self.textBrowser_chart.append(time.strftime('%H:%M:%S') + '手机端:\n' + str(file_name))
+                            self.client.send(bytes("接收到：" + file_name, 'utf8'))
+                            self.add_content(False, False, True, file_name)
                             print(file_name)
                             file_path = self.path
                             file_len = int(re.findall(r"@FName@(.*)@FLen@", self.receive_buffer, re.M)[0])
                             print(file_len)
-
                             f = open(file_path + file_name, "wb")
                             recv_len = 0
                             while recv_len < file_len:
@@ -145,29 +175,15 @@ class Connect(Ui_XuanNiaoTR):
                                 else:
                                     length = file_len - recv_len
                                 data = self.client.recv(length)
-                                print(str(data), 'utf-8')
+                                # print(str(data), 'utf-8')
                                 data_len = len(data)
                                 recv_len += data_len
-                                print("已接收：", int(recv_len / file_len * 100), "%")
+                                # print("已接收：", int(recv_len / file_len * 100), "%")
                                 f.write(data)
                             f.close()
-                            self.client.send(bytes("接收到：" + file_name, 'utf8'))
-                            self.textBrowser_chart.append(
-                                "<font color='green'>" + time.strftime('%H:%M:%S') + ' 接收到客户端文件:' + "<font>")
-                            self.textBrowser_chart.append(
-                                "<font color='green'>" + file_name + str(file_len/1024) + 'kb' + "<font>")
-                            self.textBrowser_chart.append('\n')
                     else:
                         self.receive_str = self.receive_buffer
-                        self.textBrowser_chart.append(
-                            "<font color='green'>" + time.strftime('%H:%M:%S') + ' 客户端:' + "<font>")
-                        self.textBrowser_chart.append(
-                            "<font color='green'>" + self.receive_str + "<font>")
-                        self.textBrowser_chart.append('\n')
-                    # 移动textBrowser_chart到最后
-                    cursor = self.textBrowser_chart.textCursor()
-                    cursor.movePosition(QTextCursor.End)
-                    self.textBrowser_chart.setTextCursor(cursor)
+                        self.add_content(False, False, False, text=self.receive_str)
             except Exception as e:
                 print(e)
 

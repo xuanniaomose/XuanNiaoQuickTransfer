@@ -20,6 +20,8 @@ class Ui_XuanNiaoTR(QMainWindow):
         self.pushButton_closeApp = None
         self.frame_main = None
         self.layout_main = None
+        self.scrollArea = None
+        self.scrollAreaWidgetContents = None
         self.frame_chart = None
         self.layout_chart = None
         self.textBrowser_chart = None
@@ -59,7 +61,7 @@ class Ui_XuanNiaoTR(QMainWindow):
         self.effect_shadow = QtWidgets.QGraphicsDropShadowEffect(self)
         self.effect_shadow.setOffset(0, 0)  # 偏移
         self.effect_shadow.setBlurRadius(10)  # 阴影半径
-        self.effect_shadow.setColor(QColor("#444444"))  # 阴影颜色
+        self.effect_shadow.setColor(QColor("#555555"))  # 阴影颜色
         self.widget_central.setGraphicsEffect(self.effect_shadow)  # 将设置套用到widget窗口中
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
@@ -180,7 +182,20 @@ class Ui_XuanNiaoTR(QMainWindow):
         self.pushButton_closeApp.setObjectName("pushButton_closeApp")
         self.layout_title.addWidget(self.pushButton_closeApp)
         self.layout_chart.addWidget(self.frame_title)
-        self.textBrowser_chart = QtWidgets.QTextBrowser(self.frame_chart)
+        self.scrollArea = QtWidgets.QScrollArea(self.frame_chart)
+        self.scrollArea.setStyleSheet("border: none;")
+        self.scrollArea.setWidgetResizable(True)
+        self.scrollArea.setObjectName("scrollArea")
+        self.scrollAreaWidgetContents = QtWidgets.QWidget()
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 415, 328))
+        self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
+        self.textBrowser_chart = QtWidgets.QTextBrowser(self.scrollAreaWidgetContents)
+        self.textBrowser_chart.setGeometry(QtCore.QRect(4, 0, 410, 328))
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.textBrowser_chart.sizePolicy().hasHeightForWidth())
+        self.textBrowser_chart.setSizePolicy(sizePolicy)
         self.textBrowser_chart.setStyleSheet("border: none;")
         self.textBrowser_chart.setObjectName("textBrowser_chart")
         self.textBrowser_chart.verticalScrollBar().setStyleSheet(
@@ -217,7 +232,8 @@ class Ui_XuanNiaoTR(QMainWindow):
             "QScrollBar::sub-page:vertical {\n"
             "     background: none;\n"
             " }")
-        self.layout_chart.addWidget(self.textBrowser_chart)
+        self.scrollArea.setWidget(self.scrollAreaWidgetContents)
+        self.layout_chart.addWidget(self.scrollArea)
         self.frame_medium = QtWidgets.QFrame(self.frame_chart)
         self.frame_medium.setStyleSheet("background-color: rgb(122,211,255)")
         self.frame_medium.setObjectName("frame_medium")
@@ -370,6 +386,12 @@ class Ui_XuanNiaoTR(QMainWindow):
     @pyqtSlot()
     def on_pushButton_closeApp_clicked(self):
         self.close()
+
+    def addBubble(self, text):
+        # 插入气泡并滚动
+        self.frame_bubble = QtWidgets.QTextBrowser(self.scrollAreaWidgetContents)
+        self.textBrowser_bubble = QtWidgets.QTextBrowser(self.frame_bubble)
+        self.textBrowser_bubble.append(text + '\n')
 
 
 if __name__ == '__main__':

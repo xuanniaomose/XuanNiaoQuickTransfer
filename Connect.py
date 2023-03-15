@@ -3,9 +3,9 @@ import sys
 import time
 import socket
 
-from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QTextCursor
 from PyQt5.QtWidgets import QApplication
+from PyQt5.QtCore import Qt, QObject, pyqtSlot
 
 import FileMark
 import threading
@@ -16,6 +16,8 @@ from QEditDropHandler import QEditDropHandler
 
 
 class Connect(Ui_XuanNiaoTR):
+    AddBubbleSignal = Qt.pyqtSignal(str)
+
     def __init__(self):
         super().__init__()
         self.s = None
@@ -29,7 +31,10 @@ class Connect(Ui_XuanNiaoTR):
         self.receive_str = None
         self.send_str = None
         self.ip = None
+        self.frame_bubble = None
+        self.textBrowser_bubble = None
 
+        self.textBrowser_chart.AddBubbleSignal.connect(self.add_bubble)
         self.textBrowser_chart.append(self.receive_str)
         self.lineEdit_ipv4.setText(self.Server_ipv4)
         self.lineEdit_ipv4.setReadOnly(True)
@@ -43,11 +48,22 @@ class Connect(Ui_XuanNiaoTR):
         self.lineEdit_ipv4.editingFinished.connect(self.lineEdit_ipv4.update)
         self.connecting()
 
+    def emitAddBubbleSignal(self):
+        text = str()
+        # 不把add_content分开的话如何传入add，分开的话如何检测客户端发来了信息
+        if add == True:
+            self.AddBubbleSignal.emit(text)
+
+        return
+
     def add_content(self, bubble, send, file, file_name=None, text=None):
         if bubble:
-            return
+            print("是气泡模式")
+            # 让AddBubbleSignal向scrollAreaWidgetContents发射增加frame的信号
+
         else:
             # 发送
+            print("是文本模式")
             if send:
                 color = "<font color='blue'>"
                 if file:
@@ -121,7 +137,7 @@ class Connect(Ui_XuanNiaoTR):
                 file_head = str("@FMark@" + file_name + "@FName@" + file_len + "@FLen@")
                 print(file_head + "\n", len(file_head))
                 self.client.send(bytes(file_head.encode("utf-8")))
-                self.add_content(False, True, True, file_name)
+                self.add_content(True, True, True, file_name)
                 print("文件信息已发送")
                 time.sleep(0.3)
                 f = open(file_path, 'rb')
@@ -139,7 +155,7 @@ class Connect(Ui_XuanNiaoTR):
                 # 特别注意：数据的结尾加上换行符才可让客户端的readline()停止阻塞
                 self.client.send(bytes(send_text, 'utf-8'))
                 print("触发发送3" + send_text)
-                self.add_content(False, True, False, text=send_text)
+                self.add_content(True, True, False, text=send_text)
             self.lineEdit_send.clear()
         return
 

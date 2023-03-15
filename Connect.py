@@ -102,7 +102,10 @@ class Connect(Ui_XuanNiaoTR):
                 # 特别注意：数据的结尾加上换行符才可让客户端的readline()停止阻塞
                 self.client.send(bytes(send_text, 'utf-8'))
                 print("触发发送3"+send_text)
-                self.textBrowser_chart.append(time.strftime('%H:%M:%S') + ' 服务器:\n' + send_text + '\n\n')
+                self.textBrowser_chart.append(
+                    "<font color='blue'>" + time.strftime('%H:%M:%S') + ' 电脑端:' + "<font>")
+                self.textBrowser_chart.append("<font color='blue'>" + send_text + "<font>")
+                self.textBrowser_chart.append('\n')
             self.lineEdit_send.clear()
             # 移动textBrowser_chart到最后
             cursor = self.textBrowser_chart.textCursor()
@@ -149,10 +152,18 @@ class Connect(Ui_XuanNiaoTR):
                                 f.write(data)
                             f.close()
                             self.client.send(bytes("接收到：" + file_name, 'utf8'))
+                            self.textBrowser_chart.append(
+                                "<font color='green'>" + time.strftime('%H:%M:%S') + ' 接收到客户端文件:' + "<font>")
+                            self.textBrowser_chart.append(
+                                "<font color='green'>" + file_name + str(file_len/1024) + 'kb' + "<font>")
+                            self.textBrowser_chart.append('\n')
                     else:
                         self.receive_str = self.receive_buffer
-                        self.textBrowser_chart.insertPlainText(
-                            time.strftime('%H:%M:%S') + ' 客户端:\n' + self.receive_str + '\n')
+                        self.textBrowser_chart.append(
+                            "<font color='green'>" + time.strftime('%H:%M:%S') + ' 客户端:' + "<font>")
+                        self.textBrowser_chart.append(
+                            "<font color='green'>" + self.receive_str + "<font>")
+                        self.textBrowser_chart.append('\n')
                     # 移动textBrowser_chart到最后
                     cursor = self.textBrowser_chart.textCursor()
                     cursor.movePosition(QTextCursor.End)

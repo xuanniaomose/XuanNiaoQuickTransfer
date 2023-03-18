@@ -1,16 +1,7 @@
-import sys
-import threading
-import time
-
 from PyQt5 import QtCore, QtWidgets, QtGui
-from PyQt5.QtCore import pyqtSlot, Qt, QSize
+from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor
-from PyQt5.QtWidgets import QMainWindow, QFileDialog, QApplication, QListWidgetItem, QWidget, QHBoxLayout, QVBoxLayout
-
-import Connect
-from Bubble import Bubble
-from Connect import Thread_connecting
-from QEditDropHandler import QEditDropHandler
+from PyQt5.QtWidgets import QMainWindow
 
 
 class Ui_XuanNiaoTR(QMainWindow):
@@ -29,8 +20,12 @@ class Ui_XuanNiaoTR(QMainWindow):
         self.layout_main = None
         self.scrollArea = None
         self.scrollAreaWidgetContents = None
-        self.frame_chart = None
-        self.layout_chart = None
+        self.stackedWidget = None
+        self.page_bubble = None
+        self.verticalLayout_bubble = None
+        self.listWidget_bubble = None
+        self.page_text = None
+        self.verticalLayout_text = None
         self.textBrowser_chart = None
         self.frame_medium = None
         self.layout_medium = None
@@ -41,26 +36,22 @@ class Ui_XuanNiaoTR(QMainWindow):
         self.checkBox_connect = None
         self.lineEdit_send = None
         self.frame_bottom = None
-        self.layout_bottom = None
+        self.horizontalLayout_bottom = None
         self.pushButton_send = None
-
-        self.start_point = None
-        self.window_point = None
-        self.ismoving = None
-        self.path = None
-        self.itemmodel = None
-
-        self.Thread_c = Connect.Thread_connecting()
-        self.Thread_c.addBubbleSignal_c.connect(self.addList)  # 将子线程的信号连接到主线程的刷新函数上
-        self.Thread_c.changeIpv4Signal.connect(self.changeIpv4)
-        self.Thread_s = Connect.Thread_sending()
-        self.Thread_s.addBubbleSignal_s.connect(self.addList)
-        self.Thread_r = Connect.Thread_receiving()
-        self.Thread_r.addBubbleSignal_r.connect(self.addList)
-
-        self.Thread_c.connectOKSignal.connect(self.setButtonFunction)
-        self.Thread_c.start()
-
+        self.pushButtonStyle = (
+            "QPushButton {background-color: rgb(122,211,255);border-radius: 4px;border: none;color:white}\n"
+            "QPushButton:hover {background-color: rgb(193,229,255)}\n"
+            "QPushButton:pressed {background-color: rgb(245,245,255);color: rgb(255, 255, 255)}")
+        self.ScrollbarStyle = (
+            "QScrollBar:vertical {border: none;background: rgb(240, 248, 255);width: 12px;margin: 10px 0 10px 0;}\n"
+            "QScrollBar::handle:vertical {background: rgb(100,211,255);min-height: 50px;border-radius: 5px}\n"
+            "QScrollBar::add-line:vertical {border: none;background: rgb(193,229,255);\n"
+            "    height: 10px;subcontrol-position: bottom;subcontrol-origin: margin;}\n"
+            "QScrollBar::sub-line:vertical {border: none;background: rgb(193,229,255);\n"
+            "    height: 10px;subcontrol-position: top;subcontrol-origin: margin}\n"
+            "QScrollBar::up-arrow:vertical, \n"
+            "QScrollBar::down-arrow:vertical {background: none;}\n"
+            "QScrollBar::add-page:vertical,QScrollBar::sub-page:vertical {background: none;}")
         self.setupUi(self)
 
     def setupUi(self, XuanNiaoTR):
@@ -88,7 +79,7 @@ class Ui_XuanNiaoTR(QMainWindow):
         self.layout_main.setSpacing(0)
         self.layout_main.setObjectName("layout_main")
         self.frame_title = QtWidgets.QFrame(self.frame_main)
-        self.frame_title.setStyleSheet("background-color: rgba(122,211,255,200)")
+        self.frame_title.setStyleSheet("background-color: rgba(122,211,255,230)")
         self.frame_title.setObjectName("frame_title")
         self.layout_title = QtWidgets.QHBoxLayout(self.frame_title)
         self.layout_title.setContentsMargins(-1, 0, -1, 0)
@@ -111,10 +102,7 @@ class Ui_XuanNiaoTR(QMainWindow):
         sizePolicy.setHeightForWidth(self.pushButton_setting.sizePolicy().hasHeightForWidth())
         self.pushButton_setting.setSizePolicy(sizePolicy)
         self.pushButton_setting.setMinimumSize(QtCore.QSize(35, 0))
-        self.pushButton_setting.setStyleSheet(
-            "QPushButton {background-color: rgba(122,211,255,0);border: none}\n"
-            "QPushButton:hover {background-color: rgb(193,229,255)}\n"
-            "QPushButton:pressed {background-color: rgb(245,245,255);color: rgb(255, 255, 255)}")
+        self.pushButton_setting.setStyleSheet(self.pushButtonStyle)
         self.pushButton_setting.setText("")
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap("icon/icon_setting.png"))
@@ -129,10 +117,7 @@ class Ui_XuanNiaoTR(QMainWindow):
         sizePolicy.setHeightForWidth(self.pushButton_minimizeApp.sizePolicy().hasHeightForWidth())
         self.pushButton_minimizeApp.setSizePolicy(sizePolicy)
         self.pushButton_minimizeApp.setMinimumSize(QtCore.QSize(35, 0))
-        self.pushButton_minimizeApp.setStyleSheet(
-            "QPushButton {background-color: rgba(122,211,255,0);border: none}\n"
-            "QPushButton:hover {background-color: rgb(193,229,255)}\n"
-            "QPushButton:pressed {background-color: rgb(245,245,255);color: rgb(255, 255, 255)}")
+        self.pushButton_minimizeApp.setStyleSheet(self.pushButtonStyle)
         self.pushButton_minimizeApp.setText("")
         icon1 = QtGui.QIcon()
         icon1.addPixmap(QtGui.QPixmap("icon/icon_minimize.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -147,10 +132,7 @@ class Ui_XuanNiaoTR(QMainWindow):
         sizePolicy.setHeightForWidth(self.pushButton_closeApp.sizePolicy().hasHeightForWidth())
         self.pushButton_closeApp.setSizePolicy(sizePolicy)
         self.pushButton_closeApp.setMinimumSize(QtCore.QSize(35, 0))
-        self.pushButton_closeApp.setStyleSheet(
-            "QPushButton {background-color: rgba(122,211,255,0);border: none}\n"
-            "QPushButton:hover {background-color: rgb(193,229,255)}\n"
-            "QPushButton:pressed {background-color: rgb(245,245,255);color: rgb(255, 255, 255)}")
+        self.pushButton_closeApp.setStyleSheet(self.pushButtonStyle)
         self.pushButton_closeApp.setText("")
         icon2 = QtGui.QIcon()
         icon2.addPixmap(QtGui.QPixmap("icon/icon_close.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -164,11 +146,12 @@ class Ui_XuanNiaoTR(QMainWindow):
         self.page_bubble = QtWidgets.QWidget()
         self.page_bubble.setObjectName("page_bubble")
         self.verticalLayout_bubble = QtWidgets.QVBoxLayout(self.page_bubble)
+        self.verticalLayout_bubble.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout_bubble.setObjectName("verticalLayout_bubble")
         self.listWidget_bubble = QtWidgets.QListWidget(self.page_bubble)
         self.listWidget_bubble.setStyleSheet("border:none")
         self.listWidget_bubble.setObjectName("listView_bubble")
-
+        self.listWidget_bubble.verticalScrollBar().setStyleSheet(self.ScrollbarStyle)
         self.verticalLayout_bubble.addWidget(self.listWidget_bubble)
         self.stackedWidget.addWidget(self.page_bubble)
         self.page_text = QtWidgets.QWidget()
@@ -177,22 +160,14 @@ class Ui_XuanNiaoTR(QMainWindow):
         self.verticalLayout_text.setObjectName("verticalLayout_text")
         self.textBrowser_chart = QtWidgets.QTextBrowser(self.page_text)
         self.textBrowser_chart.setStyleSheet("border: none;")
+        self.textBrowser_chart.setContextMenuPolicy(Qt.ActionsContextMenu)
         self.textBrowser_chart.setObjectName("textBrowser_chart")
-        self.textBrowser_chart.verticalScrollBar().setStyleSheet(
-            "QScrollBar:vertical {border: none;background: rgb(240, 248, 255);width: 12px;margin: 10px 0 10px 0;}\n"
-            "QScrollBar::handle:vertical {background: rgb(100,211,255);min-height: 50px;border-radius: 5px}\n"
-            "QScrollBar::add-line:vertical {border: none;background: rgb(193,229,255);\n"
-            "    height: 10px;subcontrol-position: bottom;subcontrol-origin: margin;}\n"
-            "QScrollBar::sub-line:vertical {border: none;background: rgb(193,229,255);\n"
-            "    height: 10px;subcontrol-position: top;subcontrol-origin: margin}\n"
-            "QScrollBar::up-arrow:vertical, \n"
-            "QScrollBar::down-arrow:vertical {background: none;}\n"
-            "QScrollBar::add-page:vertical,QScrollBar::sub-page:vertical {background: none;}")
+        self.textBrowser_chart.verticalScrollBar().setStyleSheet(self.ScrollbarStyle)
         self.verticalLayout_text.addWidget(self.textBrowser_chart)
         self.stackedWidget.addWidget(self.page_text)
         self.layout_main.addWidget(self.stackedWidget)
         self.frame_medium = QtWidgets.QFrame(self.frame_main)
-        self.frame_medium.setStyleSheet("background-color: rgba(122,211,255,200)")
+        self.frame_medium.setStyleSheet("background-color: rgba(122,211,255,230)")
         self.frame_medium.setObjectName("frame_medium")
         self.layout_medium = QtWidgets.QHBoxLayout(self.frame_medium)
         self.layout_medium.setObjectName("layout_medium")
@@ -243,10 +218,7 @@ class Ui_XuanNiaoTR(QMainWindow):
         sizePolicy.setHeightForWidth(self.pushButton_send.sizePolicy().hasHeightForWidth())
         self.pushButton_send.setSizePolicy(sizePolicy)
         self.pushButton_send.setMinimumSize(QtCore.QSize(75, 20))
-        self.pushButton_send.setStyleSheet(
-            "QPushButton {background-color: rgb(122,211,255);border-radius: 4px;border: none;color:white}\n"
-            "QPushButton:hover {background-color: rgb(193,229,255)}\n"
-            "QPushButton:pressed {background-color: rgb(245,245,255);color: rgb(255, 255, 255)}")
+        self.pushButton_send.setStyleSheet(self.pushButtonStyle)
         self.pushButton_send.setObjectName("pushButton_send")
         self.horizontalLayout_bottom.addWidget(self.pushButton_send)
         self.layout_main.addWidget(self.frame_bottom)
@@ -274,103 +246,6 @@ class Ui_XuanNiaoTR(QMainWindow):
         self.lineEdit_port.setText(_translate("XuanNiaoTR", "9999"))
         self.checkBox_connect.setText(_translate("XuanNiaoTR", "连接状态"))
         self.pushButton_send.setText(_translate("XuanNiaoTR", "发送"))
-
-    def mousePressEvent(self, e):
-        self.start_point = e.globalPos()
-        self.window_point = self.frameGeometry().topLeft()
-
-    def mouseMoveEvent(self, e):
-        self.ismoving = True
-        relpos = e.globalPos() - self.start_point
-        self.move(self.window_point + relpos)
-
-    def mouseReleaseEvent(self, e):
-        if not self.ismoving:
-            self.close()
-        self.ismoving = False
-
-    @pyqtSlot()
-    def on_pushButton_setting_clicked(self):
-        self.getPath()
-
-    def getPath(self):
-        get_directory_path = QFileDialog.getExistingDirectory(
-            self, "请指定文件存储路径", "D:/")
-        self.path = str(get_directory_path)
-
-    @pyqtSlot()
-    def on_pushButton_minimizeApp_clicked(self):
-        self.showMinimized()
-
-    @pyqtSlot()
-    def on_pushButton_closeApp_clicked(self):
-        self.close()
-
-    def create_item(self, Msg):
-        # 读取属性
-        Msg_type = Msg['type']
-        Msg_content = Msg['content']
-        print(Msg_type)
-        print(Msg_content)
-        # 总Widget
-        wight = QWidget()
-        # 总体横向布局
-        layout_main = QHBoxLayout()
-        if Msg_type == 0:
-            layout_content = QVBoxLayout()
-            label_content = QtWidgets.QLabel(Msg_content)
-            label_content.setTextInteractionFlags(Qt.TextSelectableByMouse)
-            label_content.setStyleSheet("background-color: rgb(122,211,255);border-radius: 4px;")
-            layout_content.addWidget(label_content)
-            layout_main.addLayout(layout_content)
-            spacerItem = QtWidgets.QSpacerItem(
-                40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-            layout_main.addItem(spacerItem)
-        else:
-            spacerItem = QtWidgets.QSpacerItem(
-                40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-            layout_main.addItem(spacerItem)
-
-            layout_content = QVBoxLayout()
-            label_content = QtWidgets.QLabel(Msg_content)
-            label_content.setTextInteractionFlags(Qt.TextSelectableByMouse)
-            label_content.setStyleSheet("background-color: rgb(130,230,255);border-radius: 4px;")
-            layout_content.addWidget(label_content)
-            layout_main.addLayout(layout_content)
-        wight.setLayout(layout_main)  # 布局给wight
-        return wight  # 返回wight
-
-    def addList(self, Msg):
-        # 添加bubble部分
-        print("创建新的气泡")
-        item = QListWidgetItem()  # 创建QListWidgetItem对象
-        item.setSizeHint(QSize(300, 50))  # 设置QListWidgetItem大小,50这个高度应可变
-        self.listWidget_bubble.addItem(item)  # 添加item
-        widget = self.create_item(Msg)  # 调用上面的函数创建widget
-        self.listWidget_bubble.setItemWidget(item, widget)  # 为item设置widget
-        print("触发发送3："+Msg['content'])
-
-    def changeIpv4(self, ipv4):
-        self.lineEdit_ipv4.setText(ipv4)
-
-    def setButtonFunction(self):
-        print("按键功能生效")
-        self.lineEdit_send.returnPressed.connect(self.sending)
-        self.pushButton_send.clicked.connect(self.sending)
-        try:
-            self.Thread_r.start()
-        except Exception as e:
-            print(e)
-
-    def sending(self):
-        self.Thread_s.getsendtext(self.lineEdit_send.text())
-        self.Thread_s.start()
-        text = time.strftime('%H:%M:%S') + ' 电脑端:' + self.lineEdit_send.text()
-        Msg = {"type": 1, "content": text}
-        self.addList(Msg)
-        self.lineEdit_send.clear()
-        print("触发发送1")
-        return
 
 
 # if __name__ == '__main__':

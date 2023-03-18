@@ -184,7 +184,7 @@ QPushButton:hover {background-color: rgb(193,229,255)}QPushButton:pressed {backg
        <item>
         <widget class="QStackedWidget" name="stackedWidget">
          <property name="currentIndex">
-          <number>0</number>
+          <number>1</number>
          </property>
          <widget class="QWidget" name="page_bubble">
           <layout class="QVBoxLayout" name="verticalLayout_bubble">
@@ -201,6 +201,9 @@ QPushButton:hover {background-color: rgb(193,229,255)}QPushButton:pressed {backg
           <layout class="QVBoxLayout" name="verticalLayout_text">
            <item>
             <widget class="QTextBrowser" name="textBrowser">
+             <property name="contextMenuPolicy">
+              <enum>Qt::ActionsContextMenu</enum>
+             </property>
              <property name="styleSheet">
               <string notr="true">border: none;</string>
              </property>

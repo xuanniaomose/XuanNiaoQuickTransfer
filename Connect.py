@@ -7,8 +7,6 @@ import FileMark
 from os import path
 from PyQt5.QtCore import pyqtSignal, QThread
 
-from QEditDropHandler import QEditDropHandler
-
 
 class Thread_connecting(QThread):
     print("连接线程启动" + time.strftime('%H:%M:%S'))
@@ -26,11 +24,8 @@ class Thread_connecting(QThread):
         self.Server_port = int(9999)
         self.receive_str = None
         self.send_str = None
-        self.ip = None
         self.frame_bubble = None
         self.textBrowser_bubble = None
-
-        # self.Server_port = int(self.lineEdit_port.text())
 
     # 自动获取本机host
     def get_host_auto(self):
@@ -39,30 +34,19 @@ class Thread_connecting(QThread):
         self.changeIpv4Signal.emit(host)
         return host
 
-    '''重写run'''
-
     def run(self):
         self.s = socket.socket()
         host = self.get_host_auto()
         self.s.bind((host, self.Server_port))
         self.s.listen(1)
-        # Cannot queue arguments of type 'QTextCursor'↓
-        # Make sure 'QTextCursor' is registered using qRegisterMetaType().↓
-
-        # self.textBrowser_chart.append('等待手机接入...\n')
-        Msg = {"type": 1, "content": "等待手机接入..."}
+        Msg = {"type": 1, "file": 0, "file_name": None, "content": "等待手机接入..."}
         self.addBubbleSignal_c.emit(Msg)
-
         self.client, self.addr = self.s.accept()
         Connect.Thread_connecting.client = self.client
-        print(str(self.client))
-        # self.textBrowser_chart.append(time.strftime('%H:%M:%S') + ' 连接手机IP为' +
-        #                               str(self.addr[0]) + '手机端口' + str(self.addr[1]) + '\n\n')
         text = time.strftime('%H:%M:%S') + ' 连接手机IP为' + str(self.addr[0]) + '手机端口' + str(self.addr[1])
-        Msg = {"type": 1, "content": text}
+        Msg = {"type": 1, "file": 0, "file_name": None, "content": text}
         self.addBubbleSignal_c.emit(Msg)
         self.connectOKSignal.emit(1)
-
         # try:
         #     Connect.Thread_receiving().start()
         # except Exception as e:
@@ -80,7 +64,7 @@ class Thread_sending(QThread):
     send_text = None
 
     def getsendtext(self, send_text):
-        self.send_text = send_text
+        self.send_text = str(send_text)
 
     def __init__(self):
         super().__init__()
@@ -90,7 +74,7 @@ class Thread_sending(QThread):
     def run(self):
         print("发送" + time.strftime('%H:%M:%S'))
         self.client = Connect.Thread_connecting.get_client(Thread_connecting())
-        print(str(self.client))
+        print(str(self.send_text))
         # if self.lineEdit_send.text() is not None:
         if self.send_text != "":
             mark = FileMark.check(self.send_text)
@@ -101,23 +85,17 @@ class Thread_sending(QThread):
                 file_head = str("@FMark@" + file_name + "@FName@" + file_len + "@FLen@")
                 print(file_head + "\n", len(file_head))
                 self.client.send(bytes(file_head.encode("utf-8")))
-
-                text = time.strftime('%H:%M:%S') + ' 电脑端发送文件:' + file_name
-                # self.add_content(True, True, True, file_name)
-                Msg = {"type": 1, "content": text}
+                Msg = {"type": 1, "file": 1, "file_name": file_name, "content": None}
                 self.addBubbleSignal.emit(Msg)
-
                 print("文件信息已发送")
                 time.sleep(0.3)
                 f = open(file_path, 'rb')
                 while 1:
                     data = f.read(1024)
                     if data is None:
-                        text = time.strftime('%H:%M:%S') + "指定路径没有找到文件：" + path.basename(file_path)
-                        # self.textBrowser_chart.append("<font color='blue'>" + text + "<font>")
-                        Msg = {"type": 1, "content": text}
+                        text = "指定路径没有找到文件：" + path.basename(file_path)
+                        Msg = {"type": 1, "file": 1, "file_name": file_name, "content": text}
                         self.addBubbleSignal_s.emit(Msg)
-
                         break
                     self.client.send(data)
                     f.flush()
@@ -125,7 +103,9 @@ class Thread_sending(QThread):
             else:
                 # 特别注意：数据的结尾加上换行符才可让客户端的readline()停止阻塞
                 self.client.send(bytes(self.send_text, 'utf-8'))
-                # self.add_content(True, True, False, text=send_text)
+                Msg = {"type": 1, "file": 0, "file_name": None, "content": self.send_text}
+                print("发送字符串")
+                self.addBubbleSignal_s.emit(Msg)
 
                 print("触发发送2" + self.send_text)
         return
@@ -143,12 +123,16 @@ class Thread_sending(QThread):
 class Thread_receiving(QThread):
     print("接收线程启动"+time.strftime('%H:%M:%S'))
     addBubbleSignal_r = pyqtSignal(dict)
+    path = 'D:/'
 
     def __init__(self):
         super().__init__()
         self.input_stream = None
         self.receive_buffer = str()  # 接收区缓冲
         self.receive_str = None
+
+    def get_path(self, path):
+        self.path = str(path)
 
     def run(self):
         while True:
@@ -161,12 +145,8 @@ class Thread_receiving(QThread):
                 if self.receive_buffer != "":
                     # print(self.receive_buffer)
                     if self.receive_buffer == "@EndMark@\n":
-
-                        text = time.strftime('%H:%M:%S') + ' 手机端:断开连接' + '\n\n'
-                        self.textBrowser_chart.append(text)
-                        Msg = {"type": 0, "content": text}
+                        Msg = {"type": 0, "file": 0, "file_name": None, "content": '手机端断开连接'}
                         self.addBubbleSignal_r.emit(Msg)
-
                     # 用正则表达式判定接收内容是“断开”、“消息”还是“文件”
                     elif msg_type is not None:
                         print(msg_type.group(0))
@@ -174,14 +154,12 @@ class Thread_receiving(QThread):
                         if msg_type.group(0) == "@FMark@":
                             file_name = re.findall(r"@FMark@(.*)@FName@", self.receive_buffer, re.M)[0]
                             self.client.send(bytes("接收到：" + file_name, 'utf8'))
-
-                            # self.add_content(False, False, True, file_name)
-                            text = time.strftime('%H:%M:%S') + ' 接收客户端文件:' + file_name
-                            Msg = {"type": 0, "content": text}
+                            Msg = {"type": 0, "file": 1, "file_name": file_name, "content": None}
                             self.addBubbleSignal_r.emit(Msg)
 
                             print(file_name)
                             file_path = self.path
+                            print(file_path)
                             file_len = int(re.findall(r"@FName@(.*)@FLen@", self.receive_buffer, re.M)[0])
                             print(file_len)
                             f = open(file_path + file_name, "wb")
@@ -200,10 +178,7 @@ class Thread_receiving(QThread):
                             f.close()
                     else:
                         self.receive_str = self.receive_buffer
-
-                        # self.add_content(False, False, False, text=self.receive_str)
-                        text = time.strftime('%H:%M:%S') + ' 客户端:' + self.receive_str
-                        Msg = {"type": 0, "content": text}
+                        Msg = {"type": 0, "file": 0, "file_name": None, "content": self.receive_str}
                         self.addBubbleSignal_r.emit(Msg)
 
             except Exception as e:

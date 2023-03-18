@@ -17,10 +17,10 @@ class Bubble:
         # self.horizontalLayout_send = None
         # self.textBrowser_send = None
     def create_item(self, Msg):
-        # self.itemmodel = QStringListModel()
+        # self.item_model = QStringListModel()
         # self.list = ()
-        # self.itemmodel.setStringList(self.list)
-        # self.listView.setModel(self.itemmodel)
+        # self.item_model.setStringList(self.list)
+        # self.listView.setModel(self.item_model)
 
         # 读取属性
         Msg_type = Msg['type']
@@ -69,54 +69,20 @@ class Bubble:
     #     self.AddBubbleSignal.emit(text)
 
     def addList(self, Msg):
-        # count = self.itemmodel.rowCount()  # 获取数据存储数据条数
-        # selectindex = self.m_ListView.currentIndex()  # 获取当前选择的数据项位置
-        # if selectindex.isValid():
-        #     pos = selectindex.row()  # 获取当前选择的数据项位置的顺序索引
+        # count = self.item_model.rowCount()  # 获取数据存储数据条数
+        # select_index = self.m_ListView.currentIndex()  # 获取当前选择的数据项位置
+        # if select_index.isValid():
+        #     pos = select_index.row()  # 获取当前选择的数据项位置的顺序索引
         # else:
         #     pos = count  # 当前没有选择则插入到最后位置
-        # self.itemmodel.insertRow(pos)   # 执行插入位置元素扩充
-        # index = self.itemmodel.index(pos, 0)  # 获取插入位置的元素项
-        # stritem = f'item{pos+1}'  # 设置插入内容
-        # self.itemmodel.setData(index, stritem, Qt.DisplayRole)  # 将内容更新到插入位置
+        # self.item_model.insertRow(pos)   # 执行插入位置元素扩充
+        # index = self.item_model.index(pos, 0)  # 获取插入位置的元素项
+        # str_item = f'item{pos+1}'  # 设置插入内容
+        # self.item_model.setData(index, str_item, Qt.DisplayRole)  # 将内容更新到插入位置
 
+        # 添加bubble部分
         item = QListWidgetItem()  # 创建QListWidgetItem对象
         item.setSizeHint(QSize(300, 50))  # 设置QListWidgetItem大小,50这个高度应可变
-        widget = self.create_item(Msg)  # 调用上面的函数获取对应
         self.listWidget_bubble.addItem(item)  # 添加item
+        widget = self.create_item(Msg)  # 调用上面的函数创建widget
         self.listWidget_bubble.setItemWidget(item, widget)  # 为item设置widget
-        print("触发发送3：" + Msg['content'])
-
-    # def addBubbleR(self, content):
-    #     self.frame_bubbleReceive = QtWidgets.QFrame(self.scrollAreaWidgetContents)
-    #     self.frame_bubbleReceive.setFrameShape(QtWidgets.QFrame.StyledPanel)
-    #     self.frame_bubbleReceive.setFrameShadow(QtWidgets.QFrame.Raised)
-    #     self.frame_bubbleReceive.setObjectName("frame_bubbleReceive")
-    #     self.horizontalLayout_receive = QtWidgets.QHBoxLayout(self.frame_bubbleReceive)
-    #     self.horizontalLayout_receive.setObjectName("horizontalLayout_receive")
-    #     self.textBrowser_receive = QtWidgets.QTextBrowser(self.frame_bubbleReceive)
-    #     sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
-    #     sizePolicy.setHorizontalStretch(0)
-    #     sizePolicy.setVerticalStretch(0)
-    #     sizePolicy.setHeightForWidth(self.textBrowser_receive.sizePolicy().hasHeightForWidth())
-    #     self.textBrowser_receive.setSizePolicy(sizePolicy)
-    #     self.textBrowser_receive.setMinimumSize(QtCore.QSize(200, 30))
-    #     self.textBrowser_receive.setObjectName("textBrowser_receive")
-    #     self.horizontalLayout_receive.addWidget(self.textBrowser_receive)
-    #     spacerItem1 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-    #     self.horizontalLayout_receive.addItem(spacerItem1)
-    #     self.verticalLayout_scroll.addWidget(self.frame_bubbleReceive)
-    #
-    # def addBubbleS(self, content):
-    #     self.frame_bubbleSend = QtWidgets.QFrame(self.scrollAreaWidgetContents)
-    #     self.frame_bubbleSend.setFrameShape(QtWidgets.QFrame.StyledPanel)
-    #     self.frame_bubbleSend.setFrameShadow(QtWidgets.QFrame.Raised)
-    #     self.frame_bubbleSend.setObjectName("frame_bubbleSend")
-    #     self.horizontalLayout_send = QtWidgets.QHBoxLayout(self.frame_bubbleSend)
-    #     self.horizontalLayout_send.setObjectName("horizontalLayout_send")
-    #     spacerItem2 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-    #     self.horizontalLayout_send.addItem(spacerItem2)
-    #     self.textBrowser_send = QtWidgets.QTextBrowser(self.frame_bubbleSend)
-    #     self.textBrowser_send.setObjectName("textBrowser_send")
-    #     self.horizontalLayout_send.addWidget(self.textBrowser_send)
-    #     self.verticalLayout_scroll.addWidget(self.frame_bubbleSend)

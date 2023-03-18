@@ -7,7 +7,7 @@ def check(send_text):
         mark = 1
     else:
         mark = 0
-    print(mark)
+    print("mark:"+str(mark))
     return mark
 
 

@@ -1,32 +1,28 @@
 import re
-import sys
 import time
 import socket
 
-from PyQt5.QtGui import QTextCursor
-from PyQt5.QtWidgets import QApplication
-from PyQt5.QtCore import Qt, QObject, pyqtSlot
-
+import Connect
 import FileMark
-import threading
 from os import path
+from PyQt5.QtCore import pyqtSignal, QThread
 
-from Server_GUI import Ui_XuanNiaoTR
 from QEditDropHandler import QEditDropHandler
 
 
-class Connect(Ui_XuanNiaoTR):
-    AddBubbleSignal = Qt.pyqtSignal(str)
+class Thread_connecting(QThread):
+    print("连接线程启动" + time.strftime('%H:%M:%S'))
+    addBubbleSignal_c = pyqtSignal(dict)
+    changeIpv4Signal = pyqtSignal(str)
+    connectOKSignal = pyqtSignal(int)
 
     def __init__(self):
         super().__init__()
         self.s = None
         self.addr = None
         self.client = None
-        self.input_stream = None
-        self.receive_buffer = str()  # 接收区缓冲
         self.send_buffer = str()  # 发送区缓冲
-        self.Server_ipv4 = self.get_host_auto()
+        self.Server_ipv4 = None
         self.Server_port = int(9999)
         self.receive_str = None
         self.send_str = None
@@ -34,135 +30,130 @@ class Connect(Ui_XuanNiaoTR):
         self.frame_bubble = None
         self.textBrowser_bubble = None
 
-        self.textBrowser_chart.AddBubbleSignal.connect(self.add_bubble)
-        self.textBrowser_chart.append(self.receive_str)
-        self.lineEdit_ipv4.setText(self.Server_ipv4)
-        self.lineEdit_ipv4.setReadOnly(True)
-        self.Server_port = int(self.lineEdit_port.text())
-        self.checkBox_connect.stateChanged.connect(self.check_connect)
-        self.lineEdit_send.setAcceptDrops(True)  # 支持拖入操作
-        self.lineEdit_send.setDragEnabled(True)  # 支持拽出操作
-        self.lineEdit_send.returnPressed.connect(self.sending)
-        self.lineEdit_send.installEventFilter(QEditDropHandler(self))  # 这句要放Ui里
-        self.pushButton_send.clicked.connect(self.sending)
-        self.lineEdit_ipv4.editingFinished.connect(self.lineEdit_ipv4.update)
-        self.connecting()
-
-    def emitAddBubbleSignal(self):
-        text = str()
-        # 不把add_content分开的话如何传入add，分开的话如何检测客户端发来了信息
-        if add == True:
-            self.AddBubbleSignal.emit(text)
-
-        return
-
-    def add_content(self, bubble, send, file, file_name=None, text=None):
-        if bubble:
-            print("是气泡模式")
-            # 让AddBubbleSignal向scrollAreaWidgetContents发射增加frame的信号
-
-        else:
-            # 发送
-            print("是文本模式")
-            if send:
-                color = "<font color='blue'>"
-                if file:
-                    self.textBrowser_chart.append(
-                        color + time.strftime('%H:%M:%S') + ' 电脑端发送文件:' + "<font>")
-                    self.textBrowser_chart.append(
-                        color + file_name + "<font>")
-                else:
-                    self.textBrowser_chart.append(
-                        color + time.strftime('%H:%M:%S') + ' 电脑端:' + "<font>")
-                    self.textBrowser_chart.append(color + text + "<font>")
-            # 接收
-            else:
-                color = "<font color='green'>"
-                if file:
-                    self.textBrowser_chart.append(
-                        color + time.strftime('%H:%M:%S') + ' 接收客户端文件:' + "<font>")
-                    self.textBrowser_chart.append(
-                        color + str(file_name) + "<font>")
-                else:
-                    self.textBrowser_chart.append(
-                        color + time.strftime('%H:%M:%S') + ' 客户端:' + "<font>")
-                    self.textBrowser_chart.append(
-                        color + text + "<font>")
-            self.textBrowser_chart.append('\n')
-            # 移动textBrowser_chart到最后
-            cursor = self.textBrowser_chart.textCursor()
-            cursor.movePosition(QTextCursor.End)
-            self.textBrowser_chart.setTextCursor(cursor)
-
-    def check_connect(self):
-        print("状态改变")
-        status = self.checkBox_connect.isChecked()
-        if status:
-            self.connect()
-            print("已连接")
+        # self.Server_port = int(self.lineEdit_port.text())
 
     # 自动获取本机host
     def get_host_auto(self):
         # 函数 gethostname() 返回当前正在执行 Python 的系统主机名
         host = str(socket.gethostbyname(socket.gethostname()))
+        self.changeIpv4Signal.emit(host)
         return host
 
-    # 建立连接
-    def connect(self):
+    '''重写run'''
+
+    def run(self):
         self.s = socket.socket()
         host = self.get_host_auto()
         self.s.bind((host, self.Server_port))
         self.s.listen(1)
         # Cannot queue arguments of type 'QTextCursor'↓
         # Make sure 'QTextCursor' is registered using qRegisterMetaType().↓
-        self.textBrowser_chart.append('等待手机接入...\n')
+
+        # self.textBrowser_chart.append('等待手机接入...\n')
+        Msg = {"type": 1, "content": "等待手机接入..."}
+        self.addBubbleSignal_c.emit(Msg)
+
         self.client, self.addr = self.s.accept()
-        self.textBrowser_chart.append(time.strftime('%H:%M:%S') + ' 连接手机IP为' +
-                                      str(self.addr[0]) + '手机端口' + str(self.addr[1]) + '\n\n')
-        try:
-            self.receiving()
-        except Exception as e:
-            print(e)
+        Connect.Thread_connecting.client = self.client
+        print(str(self.client))
+        # self.textBrowser_chart.append(time.strftime('%H:%M:%S') + ' 连接手机IP为' +
+        #                               str(self.addr[0]) + '手机端口' + str(self.addr[1]) + '\n\n')
+        text = time.strftime('%H:%M:%S') + ' 连接手机IP为' + str(self.addr[0]) + '手机端口' + str(self.addr[1])
+        Msg = {"type": 1, "content": text}
+        self.addBubbleSignal_c.emit(Msg)
+        self.connectOKSignal.emit(1)
+
+        # try:
+        #     Connect.Thread_receiving().start()
+        # except Exception as e:
+        #     print(e)
         return
 
-    # 发送数据
-    def send_data(self):
-        if self.lineEdit_send.text() is not None:
-            send_text = self.lineEdit_send.text()
-            mark = FileMark.check(send_text)
+    def get_client(self):
+        print(str(Connect.Thread_connecting.client))
+        return Connect.Thread_connecting.client
+
+
+class Thread_sending(QThread):
+    print("发送线程启动"+time.strftime('%H:%M:%S'))
+    addBubbleSignal_s = pyqtSignal(dict)
+    send_text = None
+
+    def getsendtext(self, send_text):
+        self.send_text = send_text
+
+    def __init__(self):
+        super().__init__()
+        self.client = None
+        self.paused = False
+
+    def run(self):
+        print("发送" + time.strftime('%H:%M:%S'))
+        self.client = Connect.Thread_connecting.get_client(Thread_connecting())
+        print(str(self.client))
+        # if self.lineEdit_send.text() is not None:
+        if self.send_text != "":
+            mark = FileMark.check(self.send_text)
             if mark == 1:
-                file_path = str(FileMark.fpath(send_text))
+                file_path = str(FileMark.fpath(self.send_text))
                 file_name = str(FileMark.name(file_path))
                 file_len = str(path.getsize(file_path))
                 file_head = str("@FMark@" + file_name + "@FName@" + file_len + "@FLen@")
                 print(file_head + "\n", len(file_head))
                 self.client.send(bytes(file_head.encode("utf-8")))
-                self.add_content(True, True, True, file_name)
+
+                text = time.strftime('%H:%M:%S') + ' 电脑端发送文件:' + file_name
+                # self.add_content(True, True, True, file_name)
+                Msg = {"type": 1, "content": text}
+                self.addBubbleSignal.emit(Msg)
+
                 print("文件信息已发送")
                 time.sleep(0.3)
                 f = open(file_path, 'rb')
                 while 1:
                     data = f.read(1024)
                     if data is None:
-                        self.textBrowser_chart.append(
-                            "<font color='blue'>" + time.strftime('%H:%M:%S')
-                            + "指定路径没有找到文件：" + (path.basename(file_path)) + "<font>")
+                        text = time.strftime('%H:%M:%S') + "指定路径没有找到文件：" + path.basename(file_path)
+                        # self.textBrowser_chart.append("<font color='blue'>" + text + "<font>")
+                        Msg = {"type": 1, "content": text}
+                        self.addBubbleSignal_s.emit(Msg)
+
                         break
                     self.client.send(data)
                     f.flush()
                 f.close()
             else:
                 # 特别注意：数据的结尾加上换行符才可让客户端的readline()停止阻塞
-                self.client.send(bytes(send_text, 'utf-8'))
-                print("触发发送3" + send_text)
-                self.add_content(True, True, False, text=send_text)
-            self.lineEdit_send.clear()
+                self.client.send(bytes(self.send_text, 'utf-8'))
+                # self.add_content(True, True, False, text=send_text)
+
+                print("触发发送2" + self.send_text)
         return
 
-    # 接收数据
-    def receive_data(self):
+    def resume(self):  # 用来恢复/启动run
+        with self.state:  # 在该条件下操作
+            self.paused = False
+            self.state.notify()  # Unblock self if waiting.
+
+    def pause(self):  # 用来暂停run
+        with self.state:  # 在该条件下操作
+            self.paused = True  # Block self.
+
+
+class Thread_receiving(QThread):
+    print("接收线程启动"+time.strftime('%H:%M:%S'))
+    addBubbleSignal_r = pyqtSignal(dict)
+
+    def __init__(self):
+        super().__init__()
+        self.input_stream = None
+        self.receive_buffer = str()  # 接收区缓冲
+        self.receive_str = None
+
+    def run(self):
         while True:
             try:
+                self.client = Connect.Thread_connecting.get_client(Thread_connecting())
                 self.input_stream = self.client.recv(1024)
                 # print(self.input_stream)
                 self.receive_buffer = str(self.input_stream, 'utf8')
@@ -170,7 +161,12 @@ class Connect(Ui_XuanNiaoTR):
                 if self.receive_buffer != "":
                     # print(self.receive_buffer)
                     if self.receive_buffer == "@EndMark@\n":
-                        self.textBrowser_chart.append(time.strftime('%H:%M:%S') + ' 手机端:断开连接' + '\n\n')
+
+                        text = time.strftime('%H:%M:%S') + ' 手机端:断开连接' + '\n\n'
+                        self.textBrowser_chart.append(text)
+                        Msg = {"type": 0, "content": text}
+                        self.addBubbleSignal_r.emit(Msg)
+
                     # 用正则表达式判定接收内容是“断开”、“消息”还是“文件”
                     elif msg_type is not None:
                         print(msg_type.group(0))
@@ -178,7 +174,12 @@ class Connect(Ui_XuanNiaoTR):
                         if msg_type.group(0) == "@FMark@":
                             file_name = re.findall(r"@FMark@(.*)@FName@", self.receive_buffer, re.M)[0]
                             self.client.send(bytes("接收到：" + file_name, 'utf8'))
-                            self.add_content(False, False, True, file_name)
+
+                            # self.add_content(False, False, True, file_name)
+                            text = time.strftime('%H:%M:%S') + ' 接收客户端文件:' + file_name
+                            Msg = {"type": 0, "content": text}
+                            self.addBubbleSignal_r.emit(Msg)
+
                             print(file_name)
                             file_path = self.path
                             file_len = int(re.findall(r"@FName@(.*)@FLen@", self.receive_buffer, re.M)[0])
@@ -199,30 +200,11 @@ class Connect(Ui_XuanNiaoTR):
                             f.close()
                     else:
                         self.receive_str = self.receive_buffer
-                        self.add_content(False, False, False, text=self.receive_str)
+
+                        # self.add_content(False, False, False, text=self.receive_str)
+                        text = time.strftime('%H:%M:%S') + ' 客户端:' + self.receive_str
+                        Msg = {"type": 0, "content": text}
+                        self.addBubbleSignal_r.emit(Msg)
+
             except Exception as e:
                 print(e)
-
-    # connecting(),sending()和receiving()分别开启一个线程
-    def connecting(self):
-        threading.Thread(target=self.connect).start()
-        return
-
-    def sending(self):
-        threading.Thread(target=self.send_data).start()
-        print("触发发送1")
-        return
-
-    def receiving(self):
-        sleep_time = 5
-        t_r = threading.Thread(target=self.receive_data(), args=(sleep_time,))
-        t_r.setDaemon(True)
-        t_r.start()
-
-
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    win = Connect()
-    win.setWindowFlags(Qt.FramelessWindowHint)
-    win.show()
-    app.exit(app.exec())

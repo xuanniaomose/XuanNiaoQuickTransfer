@@ -1,12 +1,14 @@
 package xuanniao.transmission.trclient;
 
+import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
-import android.os.StrictMode;
+import android.net.Uri;
+import android.os.*;
+import android.provider.DocumentsContract;
+import android.provider.Settings;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -23,6 +25,7 @@ import java.io.*;
 public class Setting extends AppCompatActivity {
     public static Handler handler_connect_on;
     private static final String Tag = "Setting";
+    private boolean isRefuse;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +33,15 @@ public class Setting extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_setting);
         setCustomActionBar();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && !isRefuse) {// android 11  且 不是已经被拒绝
+            // 先判断有没有权限
+            if (!Environment.isExternalStorageManager()) {
+                Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
+                intent.setData(Uri.parse("package:" + getPackageName()));
+                startActivityForResult(intent, 1024);
+            }
+        }
 
         //获取SharedPreferences对象
         SharedPreferences sharedPreferences = getSharedPreferences("config", Context.MODE_PRIVATE);
@@ -111,18 +123,98 @@ public class Setting extends AppCompatActivity {
                     intent_Connect.putExtra("connect_order", 1);
                     SPeditor.putInt("connect_status", 1);
                     SPeditor.apply();
-                    textview_state1.setText("开启");
+                    textview_state1.setText("连接状态：开启");
                     Log.i("连接", "已开启开关");
                 } else {
                     intent_Connect.putExtra("connect_order", 0);
                     SPeditor.putInt("connect_status", 0);
                     SPeditor.apply();
-                    textview_state1.setText("断开");
+                    textview_state1.setText("连接状态：断开");
                     Log.i("断开", "已关闭开关");
                 }
                 Connect.enqueueWork(Setting.this, intent_Connect);
             }
         });
+
+        Button button_path = findViewById(R.id.button_path);
+        button_path.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Uri uri = Uri.parse("content://com.android.externalstorage.documents/document/primary");
+                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.setType("*/*");//想要展示的文件类型
+                intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, uri);
+                startActivityForResult(intent, 0);
+            }
+        });
+
+        // 接收文件的路径
+        EditText editText_path = findViewById(R.id.editText_path);
+        String receive_path = sharedPreferences.getString("receive_path","/storage/emulated/0/Book/");
+        editText_path.setText(receive_path);
+        editText_path.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                //逻辑开始前，先移出监听
+                editText_path.removeTextChangedListener(this);
+                // 在俩者区间进行逻辑处理
+                String receive_path = editText_path.getText().toString();
+                SPeditor.putString("receive_path", receive_path);
+                SPeditor.apply();
+                //逻辑结束后，在加入监听
+                editText_path.addTextChangedListener(this);
+                Log.i(Tag,"设置receive_path:"+receive_path);
+            }
+            @Override
+            public void afterTextChanged(Editable editable) {
+            }
+        });
+
+        Button button2 = findViewById(R.id.button2);
+        button2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String receive_path = editText_path.getText().toString();
+                SPeditor.putString("receive_path", receive_path);
+                SPeditor.apply();
+            }
+        });
+    }
+
+    String path = "NULL";
+    @SuppressLint("SetTextI18n")
+    @Override
+    // 带回授权结果
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        EditText editText_path = findViewById(R.id.editText_path);
+        //获取SharedPreferences对象
+        SharedPreferences sharedPreferences = getSharedPreferences("config", Context.MODE_PRIVATE);
+        //获取editor对象的引用
+        SharedPreferences.Editor SPeditor = sharedPreferences.edit();
+        if (resultCode == Activity.RESULT_OK) {
+            Uri uri = data.getData();
+            Log.i("Setting获取到的uri", String.valueOf(uri));
+            FileChooseUtil FileChooseUtil = new FileChooseUtil(this);
+            path = FileChooseUtil.getPath(this, uri);
+            editText_path.setText(path);
+            SPeditor.putString("receive_path", path);
+            SPeditor.apply();
+        }
+        if (requestCode == 1024 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            // 检查是否有权限
+            if (Environment.isExternalStorageManager()) {
+                isRefuse = false;
+                // 授权成功
+            } else {
+                isRefuse = true;
+                // 授权失败
+            }
+        }
     }
 
     private void setCustomActionBar() {
@@ -142,6 +234,8 @@ public class Setting extends AppCompatActivity {
             }
         });
     }
+
+
 
     // 点击空白区域隐藏键盘.
     @Override

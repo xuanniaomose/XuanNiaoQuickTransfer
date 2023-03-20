@@ -231,7 +231,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // 获取音频文件
-                String path = "%2fDCIM%2fMusic%2f";
+                String path = "%2fMusic%2f";
                 openDocument(path);
             }
         });

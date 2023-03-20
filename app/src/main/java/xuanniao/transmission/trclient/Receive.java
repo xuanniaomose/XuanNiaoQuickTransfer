@@ -3,6 +3,7 @@ package xuanniao.transmission.trclient;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -132,7 +133,10 @@ public class Receive extends JobIntentService {
         }
         Log.i(Tag, file_name);
         Log.i(Tag, String.valueOf(file_len));
-        String file_path = "/storage/emulated/0/Book/";
+        //获取SharedPreferences对象
+        SharedPreferences sharedPreferences = getSharedPreferences("config", Context.MODE_PRIVATE);
+        String file_path = sharedPreferences.getString("receive_path","/storage/emulated/0/Book/");
+//        String file_path = "/storage/emulated/0/Book/";
         File f = new File(file_path+file_name);
         try {
             if (!f.exists()) {

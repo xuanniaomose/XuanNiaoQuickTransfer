@@ -53,20 +53,13 @@ public class CheckConnect extends JobIntentService {
                 socket = Connect.getSocket();
                 String check_connect = String.valueOf(socket.isConnected());
                 String check_close = String.valueOf(socket.isClosed());
+                Message message = new Message();
                 if (check_connect.equals("true") && check_close.equals("false")) {
-                    Log.i("check_connect",check_connect);
-                    Log.i("check_close",check_close);
-                    Message message = new Message();
                     message.what = 1;
-                    message.obj = "true";
-                    MainActivity.handler_check.sendMessage(message);
                 } else {
-//                    Log.i("连接", "断开");
-                    Message message = new Message();
                     message.what = 0;
-                    message.obj = "false";
-                    MainActivity.handler_check.sendMessage(message);
                 }
+                MainActivity.handler_check.sendMessage(message);
                 N = N + 1;
                 Log.i(Tag, "检查第" + N + "次执行");
             }

@@ -5,5 +5,6 @@
     <string name="upload_text">hello world!</string>
     <string name="title_activity_Setting">设置</string>
     <string name="title_activity_Connect">连接</string>
+    <string name="title_activity_FolderSelector">路径选择</string>
     <string name="socket"></string>
 </resources>

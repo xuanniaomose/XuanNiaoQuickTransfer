@@ -5,37 +5,38 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Message;
 import android.util.Log;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.core.app.JobIntentService;
 
 import java.io.*;
+import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 
 public class Connect extends JobIntentService {
     public static Socket socket = null;
     public static String check;
-    static int c = 1;
+    static int order = 1;
     private static final int JOB_ID = 0;
     private static final String Tag = "Connect";
     private SharedPreferences.Editor SPeditor;
-    private int ReC;
 
     static void enqueueWork(Context context, Intent work) {
         enqueueWork(context, Connect.class, JOB_ID, work);
-        c = work.getIntExtra("connect_order",1);
+        order = work.getIntExtra("connect_order",1);
         Log.i(Tag, "加入队列");
     }
     @Override
     protected void onHandleWork(@NonNull Intent intent) {
         Log.i(Tag, "开启");
         //获取SharedPreferences对象
-        SharedPreferences sharedPreferences = getSharedPreferences("config", Context.MODE_PRIVATE);
-        SPeditor = sharedPreferences.edit();
-        String HOST = sharedPreferences.getString("ipv4", "192.168.0.0");
-        int PORT = sharedPreferences.getInt("port", 9999);
-        ReC = sharedPreferences.getInt("ReC", 2);
-        if (c == 1) {
+        SharedPreferences SP = getSharedPreferences("config", Context.MODE_PRIVATE);
+        SPeditor = SP.edit();
+        String HOST = SP.getString("ipv4", "192.168.0.0");
+        int PORT = SP.getInt("port", 9999);
+        if (order == 1) {
             order_connect(HOST, PORT);
         } else {
             order_disconnect();
@@ -44,29 +45,27 @@ public class Connect extends JobIntentService {
 
     private void order_connect(String HOST, int PORT) {
         Log.i(Tag, "服务已开启");
-        SPeditor.putInt("connect_status", 1);
+        SPeditor.putInt("connect_on", 1);
+        SPeditor.apply();
         try {
-            int i = 0;
-            while (i < ReC) {
-                // 建立新的socket连接
-                socket = new Socket(HOST, PORT);
-                // 设定连接超时时间
-                socket.setSoTimeout(10000);
-                // 判定是否连接成功
-                check = String.valueOf(socket.isConnected());
-                if (check.equals("true")) {
-                    Log.i("连接尝试次数："+i, "成功");
-                    setSocket(socket);
-                    Message msg_c = new Message();
-                    // 连接失败代号为0，成功为1
-                    msg_c.what = 1;
-                    MainActivity.handler_connect.sendMessage(msg_c);
-                    break;
-                } else {
-                    Log.i("连接尝试次数："+i, "失败");
-                }
-                i = i + 1;
-                Log.i("socket.connectService", String.valueOf(socket));
+            // 建立新的socket连接
+            socket = new Socket();
+            SocketAddress socketAddress = new InetSocketAddress(HOST, PORT);
+            // 设定连接超时时间
+            socket.connect(socketAddress, 7000);
+            // 判定是否连接成功
+            check = String.valueOf(socket.isConnected());
+            if (check.equals("true")) {
+                setSocket(socket);
+                Message msg_c = new Message();
+                // 连接失败代号为0，成功为1
+                msg_c.what = 1;
+                MainActivity.handler_connect.sendMessage(msg_c);
+                SPeditor.putInt("connect_status", 1);
+                SPeditor.apply();
+                Log.i(Tag,"连接成功"+socket);
+            } else {
+                Log.i(Tag,"尝试连接,失败");
             }
         } catch (Exception e) {
             Log.e(Tag, ("connectService:" + e.getMessage()));
@@ -76,7 +75,8 @@ public class Connect extends JobIntentService {
             message.what = 0;
             message.obj = e.getMessage();
             MainActivity.handler_connect.sendMessage(message);
-            SPeditor.putInt("connect_status", 0);
+            SPeditor.putInt("connect_on", 0);
+            SPeditor.apply();
         }
     }
 

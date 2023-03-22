@@ -71,8 +71,8 @@
                         android:layout_height="wrap_content"
                         android:id="@+id/a_port_num"/>
                 <TextView
-                        android:text="未知"
-                        android:textColor="@color/yellow"
+                        android:text="尝试"
+                        android:textColor="@color/black"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:id="@+id/textview_state0"/>

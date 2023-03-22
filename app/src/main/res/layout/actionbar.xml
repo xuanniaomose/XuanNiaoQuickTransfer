@@ -30,14 +30,15 @@
                 android:textSize="22sp"
                 android:textColor="@color/white"
                 android:maxEms="10"
-                android:visibility="visible" android:layout_centerInParent="true"/>
+                android:visibility="visible"
+                android:layout_centerInParent="true"/>
 
         <Button
                 android:id="@+id/a_toolbar_setting"
                 android:text="设置"
                 android:layout_width="50dp"
                 android:layout_height="match_parent"
-                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
                 android:padding="5dp"
                 android:gravity="center"
                 android:background="#00000000"

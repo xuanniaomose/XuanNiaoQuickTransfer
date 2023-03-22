@@ -9,69 +9,69 @@
     <LinearLayout
             android:orientation="vertical"
             android:layout_width="0dp"
-            android:layout_height="480dp"
+            android:layout_height="300dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             android:divider="?android:dividerHorizontal"
             android:showDividers="middle|end">
-        <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:gravity="center_vertical">
-            <Space
-                    android:layout_width="20dp"
-                    android:layout_height="wrap_content"/>
-            <TextView
-                    android:text="启动app时立刻尝试进行连接"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/textView"/>
-            <Space
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    tools:ignore="NestedWeights"/>
-            <CheckBox
-                    android:id="@+id/checkBox1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checked="true"/>
-            <Space
-                    android:layout_width="10dp"
-                    android:layout_height="wrap_content"/>
-        </LinearLayout>
-        <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:gravity="center_vertical">
-            <Space
-                    android:layout_width="20dp"
-                    android:layout_height="wrap_content"/>
-            <TextView
-                    android:id="@+id/textview_state1"
-                    android:text="连接状态：开启"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
-            <Space
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    tools:ignore="NestedWeights"/>
-            <Switch
-                    android:id="@+id/switch_connect"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checked="true"
-                    tools:ignore="UseSwitchCompatOrMaterialXml"/>
-            <Space
-                    android:layout_width="20dp"
-                    android:layout_height="wrap_content"/>
-        </LinearLayout>
+<!--        <LinearLayout-->
+<!--                android:orientation="horizontal"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="0dp"-->
+<!--                android:layout_weight="1"-->
+<!--                android:gravity="center_vertical">-->
+<!--            <Space-->
+<!--                    android:layout_width="20dp"-->
+<!--                    android:layout_height="wrap_content"/>-->
+<!--            <TextView-->
+<!--                    android:text="启动app时立刻尝试进行连接"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:id="@+id/textView"/>-->
+<!--            <Space-->
+<!--                    android:layout_width="0dp"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_weight="1"-->
+<!--                    tools:ignore="NestedWeights"/>-->
+<!--            <CheckBox-->
+<!--                    android:id="@+id/checkBox1"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:checked="true"/>-->
+<!--            <Space-->
+<!--                    android:layout_width="12dp"-->
+<!--                    android:layout_height="wrap_content"/>-->
+<!--        </LinearLayout>-->
+<!--        <LinearLayout-->
+<!--                android:orientation="horizontal"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="0dp"-->
+<!--                android:layout_weight="1"-->
+<!--                android:gravity="center_vertical">-->
+<!--            <Space-->
+<!--                    android:layout_width="20dp"-->
+<!--                    android:layout_height="wrap_content"/>-->
+<!--            <TextView-->
+<!--                    android:id="@+id/textview_state1"-->
+<!--                    android:text="连接状态：断开"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"/>-->
+<!--            <Space-->
+<!--                    android:layout_width="0dp"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_weight="1"-->
+<!--                    tools:ignore="NestedWeights"/>-->
+<!--            <Switch-->
+<!--                    android:id="@+id/switch_connect"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:checked="true"-->
+<!--                    tools:ignore="UseSwitchCompatOrMaterialXml"/>-->
+<!--            <Space-->
+<!--                    android:layout_width="20dp"-->
+<!--                    android:layout_height="wrap_content"/>-->
+<!--        </LinearLayout>-->
         <LinearLayout
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
@@ -93,9 +93,9 @@
                     tools:ignore="NestedWeights"/>
             <EditText
                     android:text="@string/ipv4"
-                    android:layout_width="wrap_content"
+                    android:layout_width="110dp"
                     android:layout_height="wrap_content"
-                    android:gravity="center"
+                    android:gravity="right"
                     android:textSize="14sp"
                     android:background="@color/white"
                     android:id="@+id/edittext_ipv4_num"/>
@@ -124,13 +124,100 @@
                     tools:ignore="NestedWeights"/>
             <TextView
                     android:id="@+id/textview_port_num"
-                    android:layout_width="wrap_content"
+                    android:layout_width="40dp"
                     android:layout_height="wrap_content"
                     android:text="@string/port"
-                    android:gravity="center"/>
+                    android:gravity="right"/>
             <Space
                     android:layout_width="20dp"
                     android:layout_height="wrap_content"/>
+        </LinearLayout>
+        <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:gravity="center_vertical">
+            <Space
+                    android:layout_width="20dp"
+                    android:layout_height="wrap_content"/>
+            <TextView
+                    android:id="@+id/textView3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="设置接收路径"/>
+            <Space
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    tools:ignore="NestedWeights"/>
+            <Button
+                    android:id="@+id/button_path"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="选择文件夹"
+                    android:textSize="13sp"
+                    android:minWidth="0dp"
+                    android:minHeight="0dp"
+                    android:padding="3dp"/>
+            <Space
+                    android:layout_width="20dp"
+                    android:layout_height="wrap_content"/>
+        </LinearLayout>
+<!--        <LinearLayout-->
+<!--                android:orientation="horizontal"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="0dp"-->
+<!--                android:layout_weight="1"-->
+<!--                android:gravity="center_vertical">-->
+<!--            <Space-->
+<!--                    android:layout_width="20dp"-->
+<!--                    android:layout_height="wrap_content"/>-->
+<!--            <TextView-->
+<!--                    android:id="@+id/textView8"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:text="在下面接收路径中手动删除文件名(保留最后的/)"/>-->
+<!--            <Space-->
+<!--                    android:layout_width="0dp"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_weight="1"-->
+<!--                    tools:ignore="NestedWeights"/>-->
+<!--            <Button-->
+<!--                    android:id="@+id/button2"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:text="改好了"-->
+<!--                    android:textSize="13sp"-->
+<!--                    android:minWidth="0dp"-->
+<!--                    android:minHeight="0dp"-->
+<!--                    android:padding="3dp"/>-->
+<!--            <Space-->
+<!--                    android:layout_width="20dp"-->
+<!--                    android:layout_height="wrap_content"/>-->
+<!--        </LinearLayout>-->
+        <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:gravity="center_vertical">
+            <Space
+                    android:layout_width="20dp"
+                    android:layout_height="wrap_content"/>
+            <EditText
+                    android:id="@+id/editText_path"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="接收路径"
+                    android:gravity="center"
+                    android:textSize="14sp"
+                    android:background="@color/white"/>
+            <Space
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    tools:ignore="NestedWeights"/>
         </LinearLayout>
         <LinearLayout
                 android:orientation="horizontal"
@@ -160,93 +247,6 @@
             <Space
                     android:layout_width="20dp"
                     android:layout_height="wrap_content"/>
-        </LinearLayout>
-        <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:gravity="center_vertical">
-            <Space
-                    android:layout_width="20dp"
-                    android:layout_height="wrap_content"/>
-            <TextView
-                    android:id="@+id/textView3"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="选择要设置路径下的一个文件"/>
-            <Space
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    tools:ignore="NestedWeights"/>
-            <Button
-                    android:id="@+id/button_path"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="选择路径"
-                    android:textSize="13sp"
-                    android:minWidth="0dp"
-                    android:minHeight="0dp"
-                    android:padding="3dp"/>
-            <Space
-                    android:layout_width="20dp"
-                    android:layout_height="wrap_content"/>
-        </LinearLayout>
-        <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:gravity="center_vertical">
-            <Space
-                    android:layout_width="20dp"
-                    android:layout_height="wrap_content"/>
-            <TextView
-                    android:id="@+id/textView8"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="在下面接受路径中手动删除文件名(保留最后的/)"/>
-            <Space
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    tools:ignore="NestedWeights"/>
-            <Button
-                    android:id="@+id/button2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="改好了"
-                    android:textSize="13sp"
-                    android:minWidth="0dp"
-                    android:minHeight="0dp"
-                    android:padding="3dp"/>
-            <Space
-                    android:layout_width="20dp"
-                    android:layout_height="wrap_content"/>
-        </LinearLayout>
-        <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:gravity="center_vertical">
-            <Space
-                    android:layout_width="20dp"
-                    android:layout_height="wrap_content"/>
-            <EditText
-                    android:id="@+id/editText_path"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="接收路径"
-                    android:gravity="center"
-                    android:textSize="14sp"
-                    android:background="@color/white"/>
-            <Space
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    tools:ignore="NestedWeights"/>
         </LinearLayout>
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

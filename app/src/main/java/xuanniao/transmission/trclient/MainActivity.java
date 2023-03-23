@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.icu.text.SimpleDateFormat;
 import android.net.Uri;
 import android.os.*;
 import android.provider.DocumentsContract;
@@ -26,6 +27,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 public class MainActivity extends AppCompatActivity {
@@ -37,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
     public static Socket socket;
     public String send_text;
     public EditText inputText;
+    EditText edittext_send;
     public static MsgAdapter msg_adapter = new MsgAdapter();
     public static List<Msg> msgList;
     private TextView textview_state0;
@@ -51,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         setCustomActionBar();
         // 消息列表初始化
-        msgRecyclerView = findViewById(R.id.recyclerView);
+        msgRecyclerView = findViewById(R.id.recyclerView_chat);
         LinearLayoutManager manager = new LinearLayoutManager(this);
         msgRecyclerView.setLayoutManager(manager);
         msgRecyclerView.setAdapter(msg_adapter);
@@ -66,6 +69,10 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences SP = getSharedPreferences("config", Context.MODE_PRIVATE);
         TextView textview_ipv4num = findViewById(R.id.textview_ipv4num);
         textview_ipv4num.setText(SP.getString("ipv4", "192.168.0.0"));
+        // 获取当前时间
+        SimpleDateFormat time_format = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault());
+        long time_current = System.currentTimeMillis();
+        String time_chat = time_format.format(time_current);
         // 启动连接服务
         Log.i("主连接服务", "开启");
         Intent intent_Connect = new Intent(this, Connect.class);
@@ -80,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
         Log.i(Tag, "启动连接检查服务");
         // 设置网络状态提示
         textview_state0 = findViewById(R.id.textview_state0);
-        int textview_state = SP.getInt("connect_status", 1);
+
         handler_check = new Handler() {
             @Override
             public void handleMessage(Message message) {
@@ -155,7 +162,7 @@ public class MainActivity extends AppCompatActivity {
             public void handleMessage(Message message) {
                 if (message.what == 0) {
                     // 把新消息添加进msgList
-                    msgList.add(msgList.size(), new Msg((String) message.obj, message.what));
+                    msgList.add(msgList.size(), new Msg((String) message.obj, message.what, time_chat));
                     List<String> content_List2 = msgList.stream().map(Msg::getContent).collect(Collectors.toList());
                     List<Integer> type_List2 = msgList.stream().map(Msg::getType).collect(Collectors.toList());
                     Log.i("MainSR消息列表2", content_List2.toString());
@@ -175,7 +182,7 @@ public class MainActivity extends AppCompatActivity {
         // 监听输入框
         SharedPreferences setInfo = getSharedPreferences("SetInfo", MODE_PRIVATE);
         SharedPreferences.Editor editor = setInfo.edit();
-        EditText edittext_send = findViewById(R.id.edittext_send);
+        edittext_send = findViewById(R.id.edittext_send);
         edittext_send.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
@@ -412,13 +419,19 @@ public class MainActivity extends AppCompatActivity {
     // 初始化RecyclerView
     private void initRecyclerView() {
         Log.i("MAIN", "初始化RecyclerView");
-        Msg msg1 = new Msg("欢迎使用玄鸟快传", 0);
+        SimpleDateFormat time_format = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault());
+        long time_current = System.currentTimeMillis();
+        String time_chat = time_format.format(time_current);
+        Msg msg1 = new Msg("欢迎使用玄鸟快传", 0, time_chat);
         msgList.add(msg1);
         msg_adapter.setMsgList(msgList);
     }
 
     void addMsgList(String send_msg) {
-        msgList.add(new Msg(send_msg, 1));         //将输入的消息及其类型添加进消息数据列表中
+        SimpleDateFormat time_format = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault());
+        long time_current = System.currentTimeMillis();
+        String time_chat = time_format.format(time_current);
+        msgList.add(new Msg(send_msg, 1,time_chat));         //将输入的消息及其类型添加进消息数据列表中
         msg_adapter.notifyItemInserted(msgList.size()-1);   //为RecyclerView添加末尾子项
         msgRecyclerView.scrollToPosition(msgList.size()-1);       //跳转到当前位置
         inputText.getText().clear();                            //清空输入框文本

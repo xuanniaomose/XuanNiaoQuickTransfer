@@ -70,11 +70,11 @@ public class FolderSelector extends AppCompatActivity implements
         public void onClick(View arg0) {
             String receive_path = (String) fullPath.getText();
             Log.i("receive_path",receive_path);
-            SharedPreferences SP = getSharedPreferences(
-                    "config", Context.MODE_PRIVATE);
-            SharedPreferences.Editor SPeditor = SP.edit();
-            SPeditor.putString("receive_path", receive_path);
-            SPeditor.apply();
+//            SharedPreferences SP = getSharedPreferences(
+//                    "config", Context.MODE_PRIVATE);
+//            SharedPreferences.Editor SPeditor = SP.edit();
+//            SPeditor.putString("receive_path", receive_path);
+//            SPeditor.apply();
             Intent intent = new Intent();
 //            Uri uri = Uri.parse(receive_path);
             intent.putExtra("data", receive_path);

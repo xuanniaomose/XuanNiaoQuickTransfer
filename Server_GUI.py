@@ -1,7 +1,10 @@
+import os
+import sys
+
 from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor
-from PyQt5.QtWidgets import QMainWindow
+from PyQt5.QtWidgets import QMainWindow, QApplication
 
 
 class Ui_XuanNiaoTR(QMainWindow):
@@ -39,7 +42,7 @@ class Ui_XuanNiaoTR(QMainWindow):
         self.horizontalLayout_bottom = None
         self.pushButton_send = None
         self.pushButtonStyle = (
-            "QPushButton {background-color: rgb(122,211,255);border-radius: 4px;border: none;color:white}\n"
+            "QPushButton {background-color: rgba(122,211,255,0);border-radius: 4px;border: none;color:white}\n"
             "QPushButton:hover {background-color: rgb(193,229,255)}\n"
             "QPushButton:pressed {background-color: rgb(245,245,255);color: rgb(255, 255, 255)}")
         self.ScrollbarStyle = (
@@ -79,10 +82,11 @@ class Ui_XuanNiaoTR(QMainWindow):
         self.layout_main.setSpacing(0)
         self.layout_main.setObjectName("layout_main")
         self.frame_title = QtWidgets.QFrame(self.frame_main)
-        self.frame_title.setStyleSheet("background-color: rgba(122,211,255,230)")
+        self.frame_title.setStyleSheet("background-color: rgba(122,211,255,200)")
         self.frame_title.setObjectName("frame_title")
+        self.frame_title.setFixedHeight(50)
         self.layout_title = QtWidgets.QHBoxLayout(self.frame_title)
-        self.layout_title.setContentsMargins(-1, 0, -1, 0)
+        self.layout_title.setContentsMargins(-1, 7, -1, 7)
         self.layout_title.setObjectName("layout_title")
         self.label_title = QtWidgets.QLabel(self.frame_title)
         font = QtGui.QFont()
@@ -105,7 +109,7 @@ class Ui_XuanNiaoTR(QMainWindow):
         self.pushButton_setting.setStyleSheet(self.pushButtonStyle)
         self.pushButton_setting.setText("")
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("icon/icon_setting.png"))
+        icon.addPixmap(QtGui.QPixmap(self.get_resource_path("icon/icon_setting.png")))
         self.pushButton_setting.setIcon(icon)
         self.pushButton_setting.setIconSize(QtCore.QSize(20, 20))
         self.pushButton_setting.setObjectName("pushButton_setting")
@@ -120,7 +124,7 @@ class Ui_XuanNiaoTR(QMainWindow):
         self.pushButton_minimizeApp.setStyleSheet(self.pushButtonStyle)
         self.pushButton_minimizeApp.setText("")
         icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap("icon/icon_minimize.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon1.addPixmap(QtGui.QPixmap(self.get_resource_path("icon/icon_minimize.png")))
         self.pushButton_minimizeApp.setIcon(icon1)
         self.pushButton_minimizeApp.setIconSize(QtCore.QSize(20, 20))
         self.pushButton_minimizeApp.setObjectName("pushButton_minimizeApp")
@@ -135,7 +139,7 @@ class Ui_XuanNiaoTR(QMainWindow):
         self.pushButton_closeApp.setStyleSheet(self.pushButtonStyle)
         self.pushButton_closeApp.setText("")
         icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap("icon/icon_close.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon2.addPixmap(QtGui.QPixmap(self.get_resource_path("icon/icon_close.png")))
         self.pushButton_closeApp.setIcon(icon2)
         self.pushButton_closeApp.setIconSize(QtCore.QSize(20, 20))
         self.pushButton_closeApp.setObjectName("pushButton_closeApp")
@@ -157,6 +161,7 @@ class Ui_XuanNiaoTR(QMainWindow):
         self.page_text = QtWidgets.QWidget()
         self.page_text.setObjectName("page_text")
         self.verticalLayout_text = QtWidgets.QVBoxLayout(self.page_text)
+        self.verticalLayout_text.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout_text.setObjectName("verticalLayout_text")
         self.textBrowser_chart = QtWidgets.QTextBrowser(self.page_text)
         self.textBrowser_chart.setStyleSheet("border: none;")
@@ -178,6 +183,7 @@ class Ui_XuanNiaoTR(QMainWindow):
         self.lineEdit_ipv4 = QtWidgets.QLineEdit(self.frame_medium)
         self.lineEdit_ipv4.setStyleSheet("background-color: rgb(255,255,255);border: none;")
         self.lineEdit_ipv4.setObjectName("lineEdit_ipv4")
+        self.lineEdit_ipv4.setFixedWidth(100)
         self.layout_medium.addWidget(self.lineEdit_ipv4)
         self.label_port = QtWidgets.QLabel(self.frame_medium)
         self.label_port.setStyleSheet("background-color: rgba(255,255,255,0);color:white")
@@ -186,6 +192,7 @@ class Ui_XuanNiaoTR(QMainWindow):
         self.lineEdit_port = QtWidgets.QLineEdit(self.frame_medium)
         self.lineEdit_port.setStyleSheet("background-color: rgb(255,255,255);border: none;")
         self.lineEdit_port.setObjectName("lineEdit_port")
+        self.lineEdit_port.setFixedWidth(50)
         self.layout_medium.addWidget(self.lineEdit_port)
         spacerItem1 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.layout_medium.addItem(spacerItem1)
@@ -218,15 +225,18 @@ class Ui_XuanNiaoTR(QMainWindow):
         sizePolicy.setHeightForWidth(self.pushButton_send.sizePolicy().hasHeightForWidth())
         self.pushButton_send.setSizePolicy(sizePolicy)
         self.pushButton_send.setMinimumSize(QtCore.QSize(75, 20))
-        self.pushButton_send.setStyleSheet(self.pushButtonStyle)
+        self.pushButton_send.setStyleSheet(
+            "QPushButton {background-color: rgb(122,211,255);border-radius: 4px;border: none;color:white}\n"
+            "QPushButton:hover {background-color: rgb(193,229,255)}\n"
+            "QPushButton:pressed {background-color: rgb(245,245,255);color: rgb(255, 255, 255)}")
         self.pushButton_send.setObjectName("pushButton_send")
         self.horizontalLayout_bottom.addWidget(self.pushButton_send)
         self.layout_main.addWidget(self.frame_bottom)
-        self.layout_main.setStretch(0, 1)
-        self.layout_main.setStretch(1, 8)
-        self.layout_main.setStretch(2, 1)
-        self.layout_main.setStretch(3, 4)
-        self.layout_main.setStretch(4, 1)
+        self.layout_main.setStretch(0, 5)
+        self.layout_main.setStretch(1, 37)
+        self.layout_main.setStretch(2, 2)
+        self.layout_main.setStretch(3, 12)
+        self.layout_main.setStretch(4, 4)
         self.verticalLayout_central.addWidget(self.frame_main)
         XuanNiaoTR.setCentralWidget(self.widget_central)
 
@@ -240,12 +250,16 @@ class Ui_XuanNiaoTR(QMainWindow):
         XuanNiaoTR.setWindowTitle(_translate("XuanNiaoTR", "XuanNiaoTR"))
         self.label_title.setText(_translate("XuanNiaoTR", "玄鸟快传"))
         self.label_ipv4.setText(_translate("XuanNiaoTR", "电脑端ipv4:"))
-        self.lineEdit_ipv4.setText(_translate("XuanNiaoTR", "192.168.0.0"))
         self.label_port.setText(_translate("XuanNiaoTR", "电脑端口号:"))
         self.lineEdit_port.setInputMask(_translate("XuanNiaoTR", "0000"))
         self.lineEdit_port.setText(_translate("XuanNiaoTR", "9999"))
         self.checkBox_connect.setText(_translate("XuanNiaoTR", "连接状态"))
         self.pushButton_send.setText(_translate("XuanNiaoTR", "发送"))
+
+    def get_resource_path(self, relative_path):
+        if hasattr(sys, '_MEIPASS'):
+            return os.path.join(sys._MEIPASS, relative_path)
+        return os.path.join(os.path.abspath("."), relative_path)
 
 
 # if __name__ == '__main__':

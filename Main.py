@@ -1,16 +1,12 @@
-
 import sys
 import time
-
-from PyQt5.QtGui import QIcon, QCursor, QTextCursor
-
 import Connect
 from Server_GUI import Ui_XuanNiaoTR
-from PyQt5 import QtWidgets
 from QEditDropHandler import QEditDropHandler
+from PyQt5.QtGui import QCursor
 from PyQt5.QtCore import Qt, pyqtSignal, QSize, pyqtSlot
-from PyQt5.QtWidgets import QApplication, QListWidgetItem, QWidget, QHBoxLayout, QVBoxLayout, QFileDialog, QMenu, \
-    QAction
+from PyQt5.QtWidgets import QApplication, QListWidgetItem, QWidget, QHBoxLayout, QFileDialog, QMenu, \
+    QAction, QSizePolicy, QLabel
 
 
 class Main(Ui_XuanNiaoTR):
@@ -64,10 +60,11 @@ class Main(Ui_XuanNiaoTR):
         realPos = e.globalPos() - self.start_point
         self.move(self.window_point + realPos)
 
-    def mouseReleaseEvent(self, e):
-        if not self.is_moving:
-            self.close()
-        self.is_moving = False
+    # 使用此函数会导致单击可拖动区域闪退
+    # def mouseReleaseEvent(self, e):
+    #     if not self.is_moving:
+    #         self.close()
+    #     self.is_moving = False
 
     @pyqtSlot()
     def on_pushButton_setting_clicked(self):
@@ -88,62 +85,60 @@ class Main(Ui_XuanNiaoTR):
     def on_pushButton_closeApp_clicked(self):
         self.close()
 
-    def create_item(self, Msg):
+    def addList(self, Msg):
+        self.add_bubble(Msg)
+        self.add_text(Msg)
+
+    def add_bubble(self, Msg):
+        print(Msg)
         Msg_type = Msg['type']
         Msg_file = Msg['file']
-        # 总Widget
-        wight = QWidget()
-        # 总体横向布局
-        layout_main = QHBoxLayout()
+        # 添加bubble部分
+        item = QListWidgetItem()  # 创建QListWidgetItem对象
+        item.setSizeHint(QSize(390, 45))  # 设置QListWidgetItem大小,50这个高度应可变
+        self.listWidget_bubble.addItem(item)  # 添加item
+        # item的Widget
+        widget_item = QWidget()
+        # item的横向布局
+        layout_item = QHBoxLayout(widget_item)
+        layout_item.setContentsMargins(6, 5, 6, 5)
+
         if Msg_type == 0:
-            layout_content = QVBoxLayout()
+            layout_item.setAlignment(Qt.AlignLeft)
+            label_content = QLabel(widget_item)
             if Msg_file == 1:
                 Msg_file_name = Msg['file_name']
                 content = "接收手机端文件:"+Msg_file_name
             else:
                 Msg_content = Msg['content']
                 content = Msg_content
-            label_content = QtWidgets.QLabel(content)
-            label_content.setTextInteractionFlags(Qt.TextSelectableByMouse)
-            label_content.setStyleSheet("background-color: rgb(122,211,255);border-radius: 4px;")
-            layout_content.addWidget(label_content)
-            layout_main.addLayout(layout_content)
-
-            spacerItem = QtWidgets.QSpacerItem(
-                40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-            layout_main.addItem(spacerItem)
         else:
-            spacerItem = QtWidgets.QSpacerItem(
-                40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-            layout_main.addItem(spacerItem)
-
-            layout_content = QVBoxLayout()
+            layout_item.setAlignment(Qt.AlignRight)
+            label_content = QLabel(widget_item)
             if Msg_file == 1:
                 Msg_file_name = Msg['file_name']
                 content = "电脑端发送文件:"+Msg_file_name
             else:
                 Msg_content = Msg['content']
                 content = Msg_content
-            label_content = QtWidgets.QLabel(content)
-            label_content.setTextInteractionFlags(Qt.TextSelectableByMouse)
-            label_content.setStyleSheet("background-color: rgb(130,230,255);border-radius: 4px;")
-            layout_content.addWidget(label_content)
-            layout_main.addLayout(layout_content)
-        wight.setLayout(layout_main)  # 布局给wight
-        return wight  # 返回wight
+        label_content.setText(content)
+        # label_content.setWordWrap(True)
+        label_content.setAlignment(Qt.AlignVCenter)
+        label_content.setContentsMargins(6, 5, 6, 5)
+        label_content.setMaximumWidth(300)
+        sizePolicy = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Expanding)
+        label_content.setSizePolicy(sizePolicy)
+        label_content.setTextInteractionFlags(Qt.TextSelectableByMouse)
+        label_content.setStyleSheet("background-color: rgb(130,230,255);border-radius: 4px;")
+        label_content.setObjectName("label_content")
+        # widget_item.setStyleSheet("background-color: rgb(180,250,255);border-radius: 4px;")
+        layout_item.addWidget(label_content)
+        self.listWidget_bubble.setItemWidget(item, widget_item)  # 为item设置widget
 
-    def addList(self, Msg):
-        # 读取属性
-        print(Msg)
+    def add_text(self, Msg):
+        # 添加text部分
         Msg_type = Msg['type']
         Msg_file = Msg['file']
-        # 添加bubble部分
-        item = QListWidgetItem()  # 创建QListWidgetItem对象
-        item.setSizeHint(QSize(300, 50))  # 设置QListWidgetItem大小,50这个高度应可变
-        self.listWidget_bubble.addItem(item)  # 添加item
-        widget = self.create_item(Msg)  # 调用上面的函数创建widget
-        self.listWidget_bubble.setItemWidget(item, widget)  # 为item设置widget
-        # 添加text部分
         if Msg_type == 0:
             color = "<font color='green'>"
             if Msg_file == 1:
@@ -152,13 +147,14 @@ class Main(Ui_XuanNiaoTR):
                     color + time.strftime('%H:%M:%S') + ' 接收客户端文件:' + "<font>")
                 self.textBrowser_chart.append(
                     color + str(Msg_file_name) + "<font>")
+                self.textBrowser_chart.append("\n")
             else:
                 Msg_content = Msg['content']
                 self.textBrowser_chart.append(
                     color + time.strftime('%H:%M:%S') + ' 客户端:' + "<font>")
                 self.textBrowser_chart.append(
                     color + Msg_content + "<font>")
-
+                self.textBrowser_chart.append("\n")
         else:
             color = "<font color='blue'>"
             if Msg_file == 1:
@@ -167,11 +163,13 @@ class Main(Ui_XuanNiaoTR):
                     color + time.strftime('%H:%M:%S') + ' 电脑端发送文件:' + "<font>")
                 self.textBrowser_chart.append(
                     color + str(Msg_file_name) + "<font>")
+                self.textBrowser_chart.append("\n")
             else:
                 Msg_content = Msg['content']
                 self.textBrowser_chart.append(
                     color + time.strftime('%H:%M:%S') + ' 电脑端:' + "<font>")
                 self.textBrowser_chart.append(color + Msg_content + "<font>")
+                self.textBrowser_chart.append("\n")
 
     def changeIpv4(self, ipv4):
         self.lineEdit_ipv4.setText(ipv4)

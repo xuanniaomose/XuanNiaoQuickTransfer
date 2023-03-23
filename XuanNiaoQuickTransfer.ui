@@ -20,7 +20,7 @@
       <property name="styleSheet">
        <string notr="true">background-color: rgb(255,255,255)</string>
       </property>
-      <layout class="QVBoxLayout" name="layout_main" stretch="1,8,1,4,1">
+      <layout class="QVBoxLayout" name="layout_main" stretch="6,37,2,15,5">
        <property name="spacing">
         <number>0</number>
        </property>

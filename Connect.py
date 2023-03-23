@@ -39,11 +39,12 @@ class Thread_connecting(QThread):
         host = self.get_host_auto()
         self.s.bind((host, self.Server_port))
         self.s.listen(1)
-        Msg = {"type": 1, "file": 0, "file_name": None, "content": "等待手机接入..."}
+        Msg = {"type": 1, "file": 0, "file_name": None,
+               "content": "等待手机接入..."}
         self.addBubbleSignal_c.emit(Msg)
         self.client, self.addr = self.s.accept()
         Connect.Thread_connecting.client = self.client
-        text = time.strftime('%H:%M:%S') + ' 连接手机IP为' + str(self.addr[0]) + '手机端口' + str(self.addr[1])
+        text = '连接手机IP:' + str(self.addr[0]) + ' 手机端口:' + str(self.addr[1])
         Msg = {"type": 1, "file": 0, "file_name": None, "content": text}
         self.addBubbleSignal_c.emit(Msg)
         self.connectOKSignal.emit(1)
@@ -86,12 +87,18 @@ class Thread_sending(QThread):
                 print(file_head + "\n", len(file_head))
                 self.client.send(bytes(file_head.encode("utf-8")))
                 Msg = {"type": 1, "file": 1, "file_name": file_name, "content": None}
-                self.addBubbleSignal.emit(Msg)
+                self.addBubbleSignal_s.emit(Msg)
                 print("文件信息已发送")
-                time.sleep(0.3)
+                time.sleep(1)
+                file_len_k = int(file_len) / 1024
                 f = open(file_path, 'rb')
-                while 1:
-                    data = f.read(1024)
+                send_len = 0
+                while send_len < int(file_len):
+                    if int(file_len) - send_len > 1024:
+                        length = 1024
+                    else:
+                        length = int(file_len) - send_len
+                    data = f.read(length)
                     if data is None:
                         text = "指定路径没有找到文件：" + path.basename(file_path)
                         Msg = {"type": 1, "file": 1, "file_name": file_name, "content": text}
@@ -99,6 +106,9 @@ class Thread_sending(QThread):
                         break
                     self.client.send(data)
                     f.flush()
+                    data_len = len(data)
+                    send_len += data_len
+                    print("已发送：", int(send_len / int(file_len) * 100), "%")
                 f.close()
             else:
                 # 特别注意：数据的结尾加上换行符才可让客户端的readline()停止阻塞
@@ -106,8 +116,6 @@ class Thread_sending(QThread):
                 Msg = {"type": 1, "file": 0, "file_name": None, "content": self.send_text}
                 print("发送字符串")
                 self.addBubbleSignal_s.emit(Msg)
-
-                print("触发发送2" + self.send_text)
         return
 
     def resume(self):  # 用来恢复/启动run

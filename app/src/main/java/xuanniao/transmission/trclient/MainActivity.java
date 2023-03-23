@@ -13,9 +13,7 @@ import android.icu.text.SimpleDateFormat;
 import android.net.Uri;
 import android.os.*;
 import android.provider.DocumentsContract;
-import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
@@ -38,13 +36,17 @@ public class MainActivity extends AppCompatActivity {
     public String Tag = "MAIN";
     public static Socket socket;
     public String send_text;
-    public EditText inputText;
-    EditText edittext_send;
-    public static MsgAdapter msg_adapter = new MsgAdapter();
+    public EditText textview_send;
+    private String time_chat;
+    public MsgAdapter msg_adapter = new MsgAdapter();
     public static List<Msg> msgList;
+    public SharedPreferences SP;
+    public TextView textview_ipv4num;
     private TextView textview_state0;
     private RecyclerView msgRecyclerView;
+    private Button button_send;
     private boolean isRefuse;
+    private Intent intent_SendFile;
 
 
     @SuppressLint({"CutPasteId", "WrongViewCast", "HandlerLeak"})
@@ -54,11 +56,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         setCustomActionBar();
         // 消息列表初始化
-        msgRecyclerView = findViewById(R.id.recyclerView_chat);
-        LinearLayoutManager manager = new LinearLayoutManager(this);
-        msgRecyclerView.setLayoutManager(manager);
-        msgRecyclerView.setAdapter(msg_adapter);
-        msgList = new ArrayList<>();
         initRecyclerView();
         // 读写权限检查
         checkReadWritePermission();
@@ -66,182 +63,47 @@ public class MainActivity extends AppCompatActivity {
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
         //获取SharedPreferences对象
-        SharedPreferences SP = getSharedPreferences("config", Context.MODE_PRIVATE);
-        TextView textview_ipv4num = findViewById(R.id.textview_ipv4num);
-        textview_ipv4num.setText(SP.getString("ipv4", "192.168.0.0"));
+        SP = getSharedPreferences("config", Context.MODE_PRIVATE);
         // 获取当前时间
-        SimpleDateFormat time_format = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault());
+        SimpleDateFormat time_format =
+                new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault());
         long time_current = System.currentTimeMillis();
-        String time_chat = time_format.format(time_current);
+        time_chat = time_format.format(time_current);
         // 启动连接服务
         Log.i("主连接服务", "开启");
         Intent intent_Connect = new Intent(this, Connect.class);
         intent_Connect.putExtra("connect_order", 1);
         xuanniao.transmission.trclient.Connect.enqueueWork(MainActivity.this, intent_Connect);
-        Log.i(Tag, "启动主连接服务");
         // 启动连接检查服务
         Log.i("连接检查服务", "开启");
         Intent intent_Check = new Intent(this, CheckConnect.class);
         intent_Check.putExtra("CheckConnect", 1);
         CheckConnect.enqueueWork(MainActivity.this, intent_Check);
-        Log.i(Tag, "启动连接检查服务");
+        initView();
         // 设置网络状态提示
-        textview_state0 = findViewById(R.id.textview_state0);
-
-        handler_check = new Handler() {
+        handler_check = new Handler(Looper.myLooper()) {
             @Override
             public void handleMessage(Message message) {
                 super.handleMessage(message);
-                if (message.what == 0) {
-                    textview_state0.setText("断开");
-                    textview_state0.setTextColor(0xffff0000);
-                    Log.i("网络状态", "断开");
-                } else {
-                    textview_state0.setText("尝试");
-                    textview_state0.setTextColor(0xff0089fe);
-                    Log.i("网络状态","尝试连接");
-                }
+                set_state(message);
             }
         };
 
-        // 启动接收服务
-        handler_connect = new Handler() {
+        handler_connect = new Handler(Looper.myLooper()) {
             @Override
             public void handleMessage(Message message) {
-                if (message.what == 1) {
-                    Toast.makeText(MainActivity.this, "连接成功", Toast.LENGTH_SHORT).show();
-                    // 设置网络状态
-                    textview_state0.setText("连接");
-                    textview_state0.setTextColor(0xff008000);
-                    Log.i("网络状态", "连接");
-                    Log.i("接收服务", "开启");
-                    Intent intent_Receive = new Intent(MainActivity.this, Receive.class);
-                    intent_Receive.putExtra("Receive", 2);
-                    Receive.enqueueWork(MainActivity.this, intent_Receive);
-                    Log.i("MAIN", "启动接收服务");
-                } else {
-                    // 此处应询问connect工作队列是否还有待执行的
-                    AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
-                        //.setIcon(R.mipmap.icon)//设置标题的图片
-                        .setTitle("连接失败")//设置对话框的标题
-                        .setMessage("是否重新连接")//设置对话框的内容
-                        //设置对话框的按钮
-                        .setNegativeButton("离线", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                Toast.makeText(MainActivity.this, "离线模式下无法传输文件", Toast.LENGTH_SHORT).show();
-                                dialog.dismiss();
-                            }
-                        })
-                        .setNeutralButton("设置", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                Intent intent = new Intent();
-                                intent.setClass(MainActivity.this, Setting.class);
-                                startActivity(intent);
-                                dialog.dismiss();
-                            }
-                        })
-                        .setPositiveButton("重连", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                Toast.makeText(MainActivity.this, "开始重新连接", Toast.LENGTH_SHORT).show();
-                                Intent intent_Connect = new Intent(MainActivity.this, Connect.class);
-                                intent_Connect.putExtra("connect_order", 1);
-                                xuanniao.transmission.trclient.Connect.enqueueWork(MainActivity.this, intent_Connect);
-                                dialog.dismiss();
-                            }
-                        }).create();
-                    dialog.show();
-                }
+                start_receive(message);
             }
         };
 
-        handler_recv_msg = new Handler() {
+        handler_recv_msg = new Handler(Looper.myLooper()) {
             @Override
             public void handleMessage(Message message) {
-                if (message.what == 0) {
-                    // 把新消息添加进msgList
-                    msgList.add(msgList.size(), new Msg((String) message.obj, message.what, time_chat));
-                    List<String> content_List2 = msgList.stream().map(Msg::getContent).collect(Collectors.toList());
-                    List<Integer> type_List2 = msgList.stream().map(Msg::getType).collect(Collectors.toList());
-                    Log.i("MainSR消息列表2", content_List2.toString());
-                    Log.i("MainSR类型列表2", type_List2.toString());
-                    // msg_adapter通过局部更新方法添加尾项
-                    msg_adapter.notifyItemInserted(msg_adapter.getItemCount() - 1);
-                    // msgRecyclerView跳转到尾项
-                    msgRecyclerView.scrollToPosition(msg_adapter.getItemCount() - 1);
-                } else if (message.what == 2) {
-                    textview_state0.setText("断开");
-                    textview_state0.setTextColor(0xffff0000);
-                    Log.i("网络状态","断开");
-                }
+                add_MsgList(message);
             }
         };
 
-        // 监听输入框
-        SharedPreferences setInfo = getSharedPreferences("SetInfo", MODE_PRIVATE);
-        SharedPreferences.Editor editor = setInfo.edit();
-        edittext_send = findViewById(R.id.edittext_send);
-        edittext_send.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
-                if (i == EditorInfo.IME_ACTION_DONE) {
-                    send_text = edittext_send.getText().toString();
-                    editor.putString("上传文本", send_text);
-                    editor.apply();
-                    Log.i("上传之文本：", send_text);
-                }
-                return false;
-            }
-        });
-
-        Button button_send = findViewById(R.id.button_send);
-        inputText = findViewById(R.id.edittext_send);
-        Intent intent_SendFile = new Intent(this, Send.class);
-        button_send.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                send_text = inputText.getText().toString();
-                String send_msg;
-                if (!"".equals(send_text)) {
-                    int mark = FileMark.check(send_text);
-                    Log.i("mark判定结果", String.valueOf(mark));
-                    if (mark == 1) {
-                        String fpath = FileMark.fpath(send_text);
-                        Log.i("fpath", fpath);
-                        String name = FileMark.name(fpath);
-                        send_msg = name;
-                        // 如果连接已建立则开启文件传送服务
-                        Connect Connect = new Connect();
-                        socket = Connect.getSocket();
-                        if (!String.valueOf(socket).equals("null")) {
-                            intent_SendFile.putExtra("path", fpath);
-                            Send.enqueueWork(MainActivity.this, intent_SendFile);
-                            addMsgList(send_msg);
-                        } else {
-                            Toast.makeText(
-                                    MainActivity.this, "当前为离线模式，无法发送", Toast.LENGTH_SHORT).show();
-                        }
-                    } else {
-                        // 如果连接已建立则发送字符串
-                        Connect Connect = new Connect();
-                        socket = Connect.getSocket();
-                        if (!String.valueOf(socket).equals("null")) {
-                            send_msg = send_text;
-                            Send.sendM(send_text);
-                            addMsgList(send_msg);
-                        } else {
-                            Toast.makeText(
-                                    MainActivity.this, "当前为离线模式，无法发送", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-
-                }
-            }
-        });
-
-        handler_send = new Handler() {
+        handler_send = new Handler(Looper.myLooper()) {
             @Override
             public void handleMessage(Message message) {
                 super.handleMessage(message);
@@ -249,83 +111,55 @@ public class MainActivity extends AppCompatActivity {
                     Log.i(Tag,"已发送");
                 } else {
                     Toast.makeText(
-                            MainActivity.this, "当前为离线模式，无法发送", Toast.LENGTH_SHORT).show();
+                            MainActivity.this,
+                            "当前为离线模式，无法发送",
+                            Toast.LENGTH_SHORT).show();
                     Log.i(Tag,"当前为离线模式，无法发送");
                 }
             }
         };
+    }
 
+    private void initView() {
+        textview_ipv4num = findViewById(R.id.textview_ipv4num);
+        textview_state0 = findViewById(R.id.textview_state0);
+        button_send = findViewById(R.id.button_send);
+        button_send.setOnClickListener(sendBtn_Listener);
+        textview_send = findViewById(R.id.edittext_send);
         Button button_music = findViewById(R.id.button_music);
-        button_music.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // 获取音频文件
-                String path = "%2fMusic%2f";
-                openDocument(path);
-            }
-        });
-
+        button_music.setOnClickListener(this::onClick);
         Button button_video = findViewById(R.id.button_video);
-        button_video.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // 获取视频文件
-                String path = "%2fDCIM%2fScreenrecorder%2f";
-                openDocument(path);
-            }
-        });
-
+        button_video.setOnClickListener(this::onClick);
         Button button_image = findViewById(R.id.button_image);
-        button_image.setOnClickListener(new View.OnClickListener() {
-            @RequiresApi(api = Build.VERSION_CODES.O)
-            @Override
-            public void onClick(View v) {
-                // 获取图片文件
-                String path = "%2fDCIM%2fCamera%2f";
-                openDocument(path);
-            }
-        });
-
+        button_image.setOnClickListener(this::onClick);
         Button button_picture = findViewById(R.id.button_picture);
-        button_picture.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // 获取截图文件
-                String path = "%2fDCIM%2fScreenshots%2f";
-                openDocument(path);
-            }
-        });
-
+        button_picture.setOnClickListener(this::onClick);
         Button button_other = findViewById(R.id.button_other);
-        button_other.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // 获取其他文件
-                String path = "";
-                openDocument(path);
-            }
-        });
+        button_other.setOnClickListener(this::onClick);
+        textview_ipv4num.setText(SP.getString("ipv4", "192.168.0.0"));
+        intent_SendFile = new Intent(this, Send.class);
     }
 
 
     public Boolean checkReadWritePermission() {
         boolean isGranted = true;
-        if (android.os.Build.VERSION.SDK_INT >= 23) {
-            if (this.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                isGranted = false;
-            }
-            if (this.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                isGranted = false;
-            }
-            Log.i("读写权限获取"," ： "+isGranted);
-            if (!isGranted) {
-                this.requestPermissions(
-                        new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission
-                                .ACCESS_FINE_LOCATION,
-                                Manifest.permission.READ_EXTERNAL_STORAGE,
-                                Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                        102);
-            }
+        if (this.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            isGranted = false;
+        }
+        if (this.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            isGranted = false;
+        }
+        Log.i("读写权限获取"," ： "+isGranted);
+        if (!isGranted) {
+            this.requestPermissions(new String[]{
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    102);
+
         }
         return isGranted;
     }
@@ -350,7 +184,7 @@ public class MainActivity extends AppCompatActivity {
             Log.i("MAIN获取到的uri", String.valueOf(uri));
             FileChooseUtil FileChooseUtil = new FileChooseUtil(this);
             path = FileChooseUtil.getPath(this, uri);
-            inputText.setText("@FileMark@" + path + "@FileMarkEnd@");
+            textview_send.setText("@FileMark@" + path + "@FileMarkEnd@");
         }
         if (requestCode == 1024 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             // 检查是否有权限
@@ -400,6 +234,145 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void showFalseWindow() {
+        AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
+            //.setIcon(R.mipmap.icon)//设置标题的图片
+            .setTitle("连接失败")//设置对话框的标题
+            .setMessage("是否重新连接")//设置对话框的内容
+            //设置对话框的按钮
+            .setNegativeButton("离线", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    Toast.makeText(MainActivity.this, "离线模式下无法传输文件", Toast.LENGTH_SHORT).show();
+                    dialog.dismiss();
+                }
+            })
+            .setNeutralButton("设置", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    Intent intent = new Intent();
+                    intent.setClass(MainActivity.this, Setting.class);
+                    startActivity(intent);
+                    dialog.dismiss();
+                }
+            })
+            .setPositiveButton("重连", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    Toast.makeText(MainActivity.this, "开始重新连接", Toast.LENGTH_SHORT).show();
+                    Intent intent_Connect = new Intent(MainActivity.this, Connect.class);
+                    intent_Connect.putExtra("connect_order", 1);
+                    xuanniao.transmission.trclient.Connect.enqueueWork(MainActivity.this, intent_Connect);
+                    dialog.dismiss();
+                }
+            }).create();
+        dialog.show();
+    }
+
+    private final View.OnClickListener sendBtn_Listener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            send_text = textview_send.getText().toString();
+            String send_msg;
+            if (!"".equals(send_text)) {
+                int mark = FileMark.check(send_text);
+                Log.i("mark判定结果", String.valueOf(mark));
+                if (mark == 1) {
+                    String fpath = FileMark.fpath(send_text);
+                    Log.i("fpath", fpath);
+                    String name = FileMark.name(fpath);
+                    send_msg = name;
+                    // 如果连接已建立则开启文件传送服务
+                    Connect Connect = new Connect();
+                    socket = Connect.getSocket();
+                    if (!String.valueOf(socket).equals("null")) {
+                        intent_SendFile.putExtra("path", fpath);
+                        Send.enqueueWork(MainActivity.this, intent_SendFile);
+                        addMsgList(send_msg);
+                    } else {
+                        Toast.makeText(
+                                MainActivity.this, "当前为离线模式，无法发送", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    // 如果连接已建立则发送字符串
+                    Connect Connect = new Connect();
+                    socket = Connect.getSocket();
+                    if (!String.valueOf(socket).equals("null")) {
+                        send_msg = send_text;
+                        Send.sendM(send_text);
+                        addMsgList(send_msg);
+                    } else {
+                        Toast.makeText(
+                                MainActivity.this, "当前为离线模式，无法发送", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+            }
+        }
+    };
+
+    private void set_state(Message message) {
+        if (message.what == 0) {
+            textview_state0.setText("断开");
+            textview_state0.setTextColor(0xffff0000);
+            Log.i("网络状态", "断开");
+        } else {
+            textview_state0.setText("尝试");
+            textview_state0.setTextColor(0xff0089fe);
+            Log.i("网络状态","尝试连接");
+        }
+    }
+
+    private void start_receive(Message message) {
+        if (message.what == 1) {
+            Toast.makeText(MainActivity.this, "连接成功", Toast.LENGTH_SHORT).show();
+            // 设置网络状态
+            textview_state0.setText("连接");
+            textview_state0.setTextColor(0xff008000);
+            Intent intent_Receive = new Intent(MainActivity.this, Receive.class);
+            intent_Receive.putExtra("Receive", 2);
+            Receive.enqueueWork(MainActivity.this, intent_Receive);
+        } else {
+            showFalseWindow();
+        }
+    }
+
+    private void add_MsgList(Message message) {
+        if (message.what == 0) {
+            // 把新消息添加进msgList
+            msgList.add(msgList.size(), new Msg((String) message.obj, message.what, time_chat));
+            List<String> content_List2 = msgList.stream().map(Msg::getContent).collect(Collectors.toList());
+            List<Integer> type_List2 = msgList.stream().map(Msg::getType).collect(Collectors.toList());
+            Log.i("MainSR消息列表2", content_List2.toString());
+            Log.i("MainSR类型列表2", type_List2.toString());
+            // msg_adapter通过局部更新方法添加尾项
+            msg_adapter.notifyItemInserted(msg_adapter.getItemCount() - 1);
+            // msgRecyclerView跳转到尾项
+            msgRecyclerView.scrollToPosition(msg_adapter.getItemCount() - 1);
+        } else if (message.what == 2) {
+            textview_state0.setText("断开");
+            textview_state0.setTextColor(0xffff0000);
+            Log.i("网络状态", "断开");
+        }
+    }
+
+    void onClick(View v) {
+        String select_path;
+        int id = v.getId();
+        if (id == R.id.button_music) {
+            select_path = "%2fMusic%2f";
+        } else if (id == R.id.button_video) {
+            select_path = "%2fDCIM%2fScreenrecorder%2f";
+        } else if (id == R.id.button_image) {
+            select_path = "%2fDCIM%2fCamera%2f";
+        } else if (id == R.id.button_picture) {
+            select_path = "%2fDCIM%2fScreenshots%2f";
+        } else {
+            select_path = "";
+        }
+        openDocument(select_path);
+    }
+
     // 点击空白区域隐藏键盘 .
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -418,6 +391,11 @@ public class MainActivity extends AppCompatActivity {
 
     // 初始化RecyclerView
     private void initRecyclerView() {
+        msgRecyclerView = findViewById(R.id.recyclerView_chat);
+        LinearLayoutManager manager = new LinearLayoutManager(this);
+        msgRecyclerView.setLayoutManager(manager);
+        msgRecyclerView.setAdapter(msg_adapter);
+        msgList = new ArrayList<>();
         Log.i("MAIN", "初始化RecyclerView");
         SimpleDateFormat time_format = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault());
         long time_current = System.currentTimeMillis();
@@ -434,7 +412,7 @@ public class MainActivity extends AppCompatActivity {
         msgList.add(new Msg(send_msg, 1,time_chat));         //将输入的消息及其类型添加进消息数据列表中
         msg_adapter.notifyItemInserted(msgList.size()-1);   //为RecyclerView添加末尾子项
         msgRecyclerView.scrollToPosition(msgList.size()-1);       //跳转到当前位置
-        inputText.getText().clear();                            //清空输入框文本
+        textview_send.getText().clear();                            //清空输入框文本
         List<String> content_List2 = msgList.stream().map(Msg::getContent).collect(Collectors.toList());
         List<Integer> type_List2 = msgList.stream().map(Msg::getType).collect(Collectors.toList());
         Log.i("MainSR消息列表2", content_List2.toString());

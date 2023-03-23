@@ -47,7 +47,7 @@ public class Receive extends JobIntentService {
                     Log.d("接收消息函数标记3", receiveMsg);
                     int fmark = FileCheck(receiveMsg);
                     if (fmark == 1){
-                        WriteFile(receiveMsg);
+                        receiveMsg = WriteFile(receiveMsg);
                     }
                     Message message = new Message();
                     message.what = 0;
@@ -118,7 +118,7 @@ public class Receive extends JobIntentService {
         return fmark;
     }
 
-    public void WriteFile(String receiveMsg) {
+    public String WriteFile(String receiveMsg) {
         String file_name = "错误";
         int file_len = 0;
         Pattern regex1 = Pattern.compile("(?<=@FMark@).*?(?=@FName@)", Pattern.DOTALL);
@@ -134,10 +134,12 @@ public class Receive extends JobIntentService {
         Log.i(Tag, file_name);
         Log.i(Tag, String.valueOf(file_len));
         //获取SharedPreferences对象
-        SharedPreferences sharedPreferences = getSharedPreferences("config", Context.MODE_PRIVATE);
-        String file_path = sharedPreferences.getString("receive_path","/storage/emulated/0/Book/");
+        SharedPreferences SP = getSharedPreferences("config", Context.MODE_PRIVATE);
+        String file_path = SP.getString("receive_path","/storage/emulated/0/");
+        Log.i(Tag,file_path);
 //        String file_path = "/storage/emulated/0/Book/";
         File f = new File(file_path+file_name);
+        Log.i(Tag, file_path+file_name);
         try {
             if (!f.exists()) {
                 f.createNewFile();
@@ -189,5 +191,6 @@ public class Receive extends JobIntentService {
             } catch (IOException e) {
                 Log.i(Tag, "写入文件失败"+e);
             }
+        return file_name;
     }
 }

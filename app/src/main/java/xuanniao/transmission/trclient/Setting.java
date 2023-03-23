@@ -79,6 +79,16 @@ public class Setting extends AppCompatActivity {
         });
     }
 
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if(keyCode==KeyEvent.KEYCODE_BACK){
+            Intent intent = new Intent();
+            intent.setClass(Setting.this,MainActivity.class);
+            startActivity(intent);
+        }
+        return true;
+    }
+
     private TextWatcher ipv4Listener = new TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -124,8 +134,8 @@ public class Setting extends AppCompatActivity {
         SharedPreferences.Editor SPeditor = SP.edit();
         if (resultCode == Activity.RESULT_OK) {
             Uri uri = Uri.parse(data.getStringExtra("data"));
-            editText_path.setText(String.valueOf(uri));
-            SPeditor.putString("receive_path", String.valueOf(uri));
+            editText_path.setText(uri + "/");
+            SPeditor.putString("receive_path", uri + "/");
             SPeditor.apply();
         }
         if (requestCode == 1024 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {

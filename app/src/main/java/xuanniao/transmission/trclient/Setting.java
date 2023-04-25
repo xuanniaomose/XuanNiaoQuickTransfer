@@ -95,7 +95,7 @@ public class Setting extends AppCompatActivity {
         }
         @Override
         public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            //逻辑开始前，先移出监听
+            // 逻辑开始前，先移出监听
             textview_ipv4.removeTextChangedListener(this);
             // 在俩者区间进行逻辑处理
             String input_ipv4 = textview_ipv4.getText().toString();

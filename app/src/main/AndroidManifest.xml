@@ -50,6 +50,7 @@
             </intent-filter>
         </service>
 
+        <!--注册Service-->
         <activity
                 android:name=".MainActivity"
                 android:exported="true">

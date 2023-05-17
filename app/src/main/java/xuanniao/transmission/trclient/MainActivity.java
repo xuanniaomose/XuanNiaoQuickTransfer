@@ -23,9 +23,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class MainActivity extends AppCompatActivity {
@@ -282,16 +280,17 @@ public class MainActivity extends AppCompatActivity {
                     Log.i("fpath", fpath);
                     String name = FileMark.name(fpath);
                     send_msg = name;
+                    // 挨个吧文件名加入文件列表(未完成)
+                    Map<Integer,String> file_list = new HashMap<Integer, String>();
+                    file_list.put(i,fpath);
                     // 如果连接已建立则开启文件传送服务
-                    Connect Connect = new Connect();
-                    socket = Connect.getSocket();
-                    if (!String.valueOf(socket).equals("null")) {
-                        intent_SendFile.putExtra("path", fpath);
-                        Send.enqueueWork(MainActivity.this, intent_SendFile);
-                        addMsgList(send_msg);
-                    } else {
-                        Toast.makeText(
-                                MainActivity.this, "当前为离线模式，无法发送", Toast.LENGTH_SHORT).show();
+                    int n = 3; // n是文件数目
+                    int i = 1;
+                    while (i < n) {
+                        Intent intent_connect = new Intent(MainActivity.this, Connect.class);
+                        Connect.enqueueWork(MainActivity.this, intent_connect);
+                        ConnectOK(i, file_list);
+                        i++;
                     }
                 } else {
                     // 如果连接已建立则发送字符串
@@ -417,5 +416,31 @@ public class MainActivity extends AppCompatActivity {
         List<Integer> type_List2 = msgList.stream().map(Msg::getType).collect(Collectors.toList());
         Log.i("MainSR消息列表2", content_List2.toString());
         Log.i("MainSR类型列表2", type_List2.toString());
+    }
+
+    public void ConnectOK(int i, Map<Integer,String> file_list){
+        handler_connect = new Handler(Looper.myLooper()) {
+            @Override
+            public void handleMessage(Message message) {
+                if (message.what == 1) {
+                    // 如果连接已建立则开启文件传送服务
+                    Connect Connect = new Connect();
+                    Socket socket = Connect.getSocket();
+                    if (!String.valueOf(socket).equals("null")) {
+                        // 发送文件
+                        Intent intent_send = new Intent(MainActivity.this,Send.class);
+                        String path = file_list.get(i);
+                        intent_send.putExtra("path", path);
+                        Send.enqueueWork(MainActivity.this,intent_send);
+                        // 关闭连接
+                        Intent intent_disconnect = new Intent(MainActivity.this,Send.class);
+                        DisConnect.enqueueWork(MainActivity.this,intent_disconnect);
+                    } else {
+                        Toast.makeText(
+                                MainActivity.this, "当前为离线模式，无法发送", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+        };
     }
 }

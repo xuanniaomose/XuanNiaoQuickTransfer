@@ -36,14 +36,10 @@ public class Connect extends JobIntentService {
         SPeditor = SP.edit();
         String HOST = SP.getString("ipv4", "192.168.0.0");
         int PORT = SP.getInt("port", 9999);
-        if (order == 1) {
-            order_connect(HOST, PORT);
-        } else {
-            order_disconnect();
-        }
+        connect(HOST, PORT);
     }
 
-    private void order_connect(String HOST, int PORT) {
+    private void connect(String HOST, int PORT) {
         Log.i(Tag, "服务已开启");
         SPeditor.putInt("connect_on", 1);
         SPeditor.apply();
@@ -78,37 +74,6 @@ public class Connect extends JobIntentService {
             SPeditor.putInt("connect_on", 0);
             SPeditor.apply();
         }
-    }
-
-    private void order_disconnect() {
-        try {
-            socket = getSocket();
-            Log.i("socket.disconnect", String.valueOf(socket));
-            InputStream in = socket.getInputStream();
-            OutputStream out = socket.getOutputStream();
-            out.write("@EndMark@".getBytes(StandardCharsets.UTF_8));
-            byte[] buf = new byte[1024];
-            int len;
-            while ((len = in.read(buf)) != -1) {
-                System.out.print(new String(buf, 0, len, StandardCharsets.UTF_8));
-                out.write(buf, 0, len);
-            }
-            out.write("\n end \n".getBytes(StandardCharsets.UTF_8));
-            out.flush();
-            socket.shutdownInput();
-            socket.shutdownOutput();
-            SPeditor.putInt("connect_status", 0);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }finally {
-            try {
-                socket.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        // 判断客户端和服务器是否已经断开连接
-        Log.d("断开连接", String.valueOf(socket.isConnected()));
     }
 
     public Socket getSocket() {

@@ -4,10 +4,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.SharedPreferences;
+import android.content.*;
 import android.content.pm.PackageManager;
 import android.icu.text.SimpleDateFormat;
 import android.net.Uri;
@@ -26,18 +23,22 @@ import java.net.Socket;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import xuanniao.transmission.trclient.FileChooseUtil;
+
 public class MainActivity extends AppCompatActivity {
     public static Handler handler_connect;
     public static Handler handler_check;
     public static Handler handler_send;
     public static Handler handler_recv_msg;
     public String Tag = "MAIN";
+    SharedPreferences.Editor SPeditor;
     public static Socket socket;
     public String send_text;
     public EditText textview_send;
     private String time_chat;
     public MsgAdapter msg_adapter = new MsgAdapter();
     public static List<Msg> msgList;
+    public List<String> fileList;
     public SharedPreferences SP;
     public TextView textview_ipv4num;
     private TextView textview_state0;
@@ -62,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
         StrictMode.setThreadPolicy(policy);
         //获取SharedPreferences对象
         SP = getSharedPreferences("config", Context.MODE_PRIVATE);
+        SPeditor = SP.edit();
         // 获取当前时间
         SimpleDateFormat time_format =
                 new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault());
@@ -134,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
         button_picture.setOnClickListener(this::onClick);
         Button button_other = findViewById(R.id.button_other);
         button_other.setOnClickListener(this::onClick);
-        textview_ipv4num.setText(SP.getString("ipv4", "192.168.0.0"));
+        textview_ipv4num.setText(SP.getString("ipv4", "192.168.1.0"));
         intent_SendFile = new Intent(this, Send.class);
     }
 
@@ -167,35 +169,48 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.setType("*/*");//想要展示的文件类型
-        intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, uri);
-        startActivityForResult(intent, 0);
+//        intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, uri);
+        intent.putExtra (Intent.EXTRA_ALLOW_MULTIPLE, true);
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(intent, 1);
     }
 
     String path = "NULL";
     @SuppressLint("SetTextI18n")
     @Override
-    // 带回文件路径
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == Activity.RESULT_OK) {
-            Uri uri = data.getData();
-            Log.i("MAIN获取到的uri", String.valueOf(uri));
+        Uri uri;
+        fileList = new ArrayList<>();
+        if (requestCode == 1 && data != null) {
+            ClipData imageNames = data.getClipData();
+            if (imageNames != null) {
+                for (int i = 0; i < imageNames.getItemCount(); i++) {
+                    uri = imageNames.getItemAt(i).getUri();
+                    path = FileChooseUtil.getPath(this, uri);
+                    fileList.add(path);
+                    textview_send.append("@FileMark@"+uri+"@FileMarkEnd@");
+                }
+                Log.d("fileList", fileList.toString());
+            } else {
+                uri = data.getData();
+                Log.d("uri", String.valueOf(uri));
+                FileChooseUtil FileChooseUtil = new FileChooseUtil(this);
+                path = FileChooseUtil.getPath(this, uri);
+                textview_send.append("@FileMark@"+path+"@FileMarkEnd@");
+                fileList.add(path);
+                Log.d("fileList", fileList.toString());
+            }
+        } else {
+            uri = data.getData();
+            Log.d("uri", String.valueOf(uri));
             FileChooseUtil FileChooseUtil = new FileChooseUtil(this);
             path = FileChooseUtil.getPath(this, uri);
-            textview_send.setText("@FileMark@" + path + "@FileMarkEnd@");
-        }
-        if (requestCode == 1024 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            // 检查是否有权限
-            if (Environment.isExternalStorageManager()) {
-                isRefuse = false;
-                // 授权成功
-            } else {
-                isRefuse = true;
-                // 授权失败
-            }
+            textview_send.append("@FileMark@"+path+"@FileMarkEnd@");
+            fileList.add(path);
+            Log.d("fileList", fileList.toString());
         }
     }
-
     private void setCustomActionBar() {
         ActionBar.LayoutParams lp = new ActionBar.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT,
                 ActionBar.LayoutParams.MATCH_PARENT, Gravity.CENTER);
@@ -276,22 +291,20 @@ public class MainActivity extends AppCompatActivity {
                 int mark = FileMark.check(send_text);
                 Log.i("mark判定结果", String.valueOf(mark));
                 if (mark == 1) {
-                    String fpath = FileMark.fpath(send_text);
-                    Log.i("fpath", fpath);
-                    String name = FileMark.name(fpath);
-                    send_msg = name;
-                    // 挨个吧文件名加入文件列表(未完成)
-                    Map<Integer,String> file_list = new HashMap<Integer, String>();
-                    file_list.put(i,fpath);
                     // 如果连接已建立则开启文件传送服务
-                    int n = 3; // n是文件数目
-                    int i = 1;
-                    while (i < n) {
-                        Intent intent_connect = new Intent(MainActivity.this, Connect.class);
-                        Connect.enqueueWork(MainActivity.this, intent_connect);
-                        ConnectOK(i, file_list);
-                        i++;
-                    }
+//                    for (int i=0; i < fileList.size(); i++) {
+//                        Intent intent_connect = new Intent(MainActivity.this, Connect.class);
+//                        Connect.enqueueWork(MainActivity.this, intent_connect);
+//                        ConnectOK(i, fileList);
+
+//                        String fpath = fileList.get(i);
+//                        Log.i("i", String.valueOf(i));
+//                        String name = FileMark.name(fpath);
+//                        send_msg = name;
+                        intent_SendFile.putStringArrayListExtra("path", (ArrayList<String>) fileList);
+                        Send.enqueueWork(MainActivity.this, intent_SendFile);
+                        addMsgList(fileList.toString());
+//                    }
                 } else {
                     // 如果连接已建立则发送字符串
                     Connect Connect = new Connect();
@@ -418,7 +431,7 @@ public class MainActivity extends AppCompatActivity {
         Log.i("MainSR类型列表2", type_List2.toString());
     }
 
-    public void ConnectOK(int i, Map<Integer,String> file_list){
+    public void ConnectOK(int i, List<String> file_list){
         handler_connect = new Handler(Looper.myLooper()) {
             @Override
             public void handleMessage(Message message) {

@@ -34,7 +34,7 @@ public class Connect extends JobIntentService {
         //获取SharedPreferences对象
         SharedPreferences SP = getSharedPreferences("config", Context.MODE_PRIVATE);
         SPeditor = SP.edit();
-        String HOST = SP.getString("ipv4", "192.168.0.0");
+        String HOST = SP.getString("ipv4", "192.168.1.0");
         int PORT = SP.getInt("port", 9999);
         connect(HOST, PORT);
     }

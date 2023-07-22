@@ -64,7 +64,7 @@ public class FileChooseUtil {
      * 专为Android4.4设计的从Uri获取文件绝对路径，以前的方法已不好使
      */
     @SuppressLint("NewApi")
-    String getPath(final Context context, final Uri uri) {
+    static String getPath(final Context context, final Uri uri) {
 
         final boolean isKitKat = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
 
@@ -127,7 +127,7 @@ public class FileChooseUtil {
         return null;
     }
 
-    private String getDataColumn(Context context, Uri uri, String selection, String[] selectionArgs) {
+    private static String getDataColumn(Context context, Uri uri, String selection, String[] selectionArgs) {
         Cursor cursor = null;
         final String column = "_data";
         final String[] projection = {column};
@@ -149,7 +149,7 @@ public class FileChooseUtil {
      * @param uri The Uri to check.
      * @return Whether the Uri authority is ExternalStorageProvider.
      */
-    private boolean isExternalStorageDocument(Uri uri) {
+    private static boolean isExternalStorageDocument(Uri uri) {
         return "com.android.externalstorage.documents".equals(uri.getAuthority());
     }
 
@@ -157,7 +157,7 @@ public class FileChooseUtil {
      * @param uri The Uri to check.
      * @return Whether the Uri authority is DownloadsProvider.
      */
-    private boolean isDownloadsDocument(Uri uri) {
+    private static boolean isDownloadsDocument(Uri uri) {
         return "com.android.providers.downloads.documents".equals(uri.getAuthority());
     }
 
@@ -165,7 +165,7 @@ public class FileChooseUtil {
      * @param uri The Uri to check.
      * @return Whether the Uri authority is MediaProvider.
      */
-    private boolean isMediaDocument(Uri uri) {
+    private static boolean isMediaDocument(Uri uri) {
         return "com.android.providers.media.documents".equals(uri.getAuthority());
     }
 }

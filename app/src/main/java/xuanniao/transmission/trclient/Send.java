@@ -9,31 +9,37 @@ import androidx.core.app.JobIntentService;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.ArrayList;
+
+import static java.lang.Thread.sleep;
 
 public class Send extends JobIntentService {
     private static final int JOB_ID = 3;
     public static String Tag = "Send";
     public static Socket socket;
-    private static File path;
+    private static ArrayList<String> paths;
     private String msg;
 
     static void enqueueWork(Context context, Intent work) {
         enqueueWork(context, Send.class, JOB_ID, work);
-        path = new File(work.getStringExtra("path"));
+        paths = work.getStringArrayListExtra("path");
     }
 
     @Override
     // 服务功能的设置
     protected void onHandleWork(@NonNull Intent intent) {
         try {
-            Connect Connect = new Connect();
-            socket = Connect.getSocket();
-            DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
-//            dos.writeUTF("@FMark@"+path.getName()+"@FName@"+(int)path.length()+"@FLen@");
-            dos.write(("@FMark@"+path.getName()+"@FName@"+(int)path.length()+"@FLen@").getBytes());
-            Log.i(Tag,"文件信息已发送");
-            dos.flush();
-            sendF(path);
+            for (int i=0; i < paths.size(); i++) {
+                File path = new File(paths.get(i));
+                Connect Connect = new Connect();
+                socket = Connect.getSocket();
+                DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
+//                dos.writeUTF("@FMark@"+path.getName()+"@FName@"+(int)path.length()+"@FLen@");
+                dos.write(("@FMark@" + path.getName() + "@FName@" + (int) path.length() + "@FLen@").getBytes());
+                Log.i(Tag, "文件信息已发送");
+                dos.flush();
+                sendF(path);
+            }
         } catch (Exception e) {
             e.printStackTrace();
             Message msg_s = new Message();
@@ -46,24 +52,41 @@ public class Send extends JobIntentService {
     private static void sendF(File path) {
         try{
             if (!String.valueOf(socket).equals("")) {
-                Log.i(Tag,"开始发送");
+                Log.i(Tag, "开始发送");
                 DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
                 // 获取文件的字节流
                 FileInputStream fis = new FileInputStream(path);
                 // 向输出流加载数据
-                int file_len_k = ((int)path.length())/1024;
+                int file_len_k = ((int) path.length()) / 1024;
                 int len = -1;
                 int n = 0;
                 byte[] buffer = new byte[1024];
                 while ((len = fis.read(buffer, 0, 1024)) != -1) {
-                    n ++;
+                    n++;
+//                    // 计算上传百分比
+//                    int parseInt = Integer.parseInt(new String(buffer,0,len));
+//                    if (parseInt == 0) {
+//                        Log.d("已上传完成:",parseInt+"%");
+//                    }else{
+//                        Log.d("已上传完成:",PercentageUtils.division(parseInt, (int)path.length())+"%");
+//                    }
                     dos.write(buffer, 0, len);
                     dos.flush();
-                    if (n>file_len_k) {
+                    if (n > file_len_k) {
                         fis.close();
                         break;
                     }
                 }
+//                Log.i(Tag,"发送完成");
+//
+//                //获取上传信息
+//                num = in.read(bufIn);
+//                System.out.println(new String(bufIn,0,num));
+                //关闭资源
+                fis.close();
+//                dos.close();
+//                socket.close();
+                sleep(1000);
             } else {
                 Message msg_s = new Message();
                 msg_s.what = 0;

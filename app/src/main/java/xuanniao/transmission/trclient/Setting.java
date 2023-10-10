@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.*;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
+import androidx.annotation.StringRes;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -42,7 +43,7 @@ public class Setting extends AppCompatActivity {
         //获取SharedPreferences及其editor
         SharedPreferences SP = getSharedPreferences("config", Context.MODE_PRIVATE);
         SPeditor = SP.edit();
-        ipv4 = SP.getString("ipv4", "192.168.0.0");
+        ipv4 = SP.getString("ipv4", getString(R.string.ipv4));
         receive_path = SP.getString("receive_path","/storage/emulated/0/");
         initView(ipv4, receive_path);
     }

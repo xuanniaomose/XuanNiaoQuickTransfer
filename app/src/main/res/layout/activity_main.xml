@@ -28,14 +28,14 @@
                     android:layout_height="wrap_content">
                 <TextView
                         android:text="电脑端ipv4地址："
-                        android:textColor="@color/grey"
+                        android:textColor="@color/gray_500"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center"
                         android:id="@+id/textview_ipv4"/>
                 <TextView
                         android:text="@string/ipv4"
-                        android:textColor="@color/grey"
+                        android:textColor="@color/gray_500"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center"
@@ -60,13 +60,13 @@
                     android:layout_height="wrap_content">
                 <TextView
                         android:text="电脑端端口:"
-                        android:textColor="@color/grey"
+                        android:textColor="@color/gray_500"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:id="@+id/a_port"/>
                 <TextView
                         android:text="@string/port"
-                        android:textColor="@color/grey"
+                        android:textColor="@color/gray_500"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:id="@+id/a_port_num"/>
@@ -95,7 +95,7 @@
                     android:orientation="horizontal"
                     android:layout_width="match_parent"
                     android:layout_height="55dp"
-                    android:background="@color/blue_200"
+                    android:background="@color/blue_300"
                     android:id="@+id/linearlayout_content"
                     android:gravity="center_vertical">
                 <EditText

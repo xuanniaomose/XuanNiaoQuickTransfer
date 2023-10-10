@@ -2,14 +2,12 @@ package xuanniao.transmission.trclient;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.*;
 import android.content.pm.PackageManager;
 import android.icu.text.SimpleDateFormat;
 import android.net.Uri;
 import android.os.*;
-import android.provider.DocumentsContract;
 import android.view.inputmethod.InputMethodManager;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -23,12 +21,11 @@ import java.net.Socket;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import xuanniao.transmission.trclient.FileChooseUtil;
-
 public class MainActivity extends AppCompatActivity {
     public static Handler handler_connect;
     public static Handler handler_check;
     public static Handler handler_send;
+    public static Handler handler_sendF;
     public static Handler handler_recv_msg;
     public String Tag = "MAIN";
     SharedPreferences.Editor SPeditor;
@@ -99,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
         handler_recv_msg = new Handler(Looper.myLooper()) {
             @Override
             public void handleMessage(Message message) {
-                add_MsgList(message);
+                add_MsgList(message, msgList.size());
             }
         };
 
@@ -107,14 +104,28 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void handleMessage(Message message) {
                 super.handleMessage(message);
-                if (message.what == 1) {
-                    Log.i(Tag,"已发送");
-                } else {
-                    Toast.makeText(
-                            MainActivity.this,
-                            "当前为离线模式，无法发送",
-                            Toast.LENGTH_SHORT).show();
+                if (message.what == 0) {
+                    Toast.makeText(MainActivity.this,
+                            "当前为离线模式，无法发送",Toast.LENGTH_SHORT).show();
                     Log.i(Tag,"当前为离线模式，无法发送");
+                } else {
+                    Log.d(Tag+" add_MsgList",message.arg1+" / "+message.arg2);
+                    add_MsgList(message, message.what);
+                    Log.i(Tag, "已发送" + message.obj);
+                }
+            }
+        };
+
+        handler_sendF = new Handler(Looper.myLooper()) {
+            @Override
+            public void handleMessage(Message message) {
+                super.handleMessage(message);
+                if (message.what == 0) {
+                    Toast.makeText(MainActivity.this,
+                            "当前为离线模式，无法发送",Toast.LENGTH_SHORT).show();
+                    Log.i(Tag,"当前为离线模式，无法发送");
+                } else {
+                    msg_adapter.notifyItemChanged(message.what, message.obj);
                 }
             }
         };
@@ -136,7 +147,7 @@ public class MainActivity extends AppCompatActivity {
         button_picture.setOnClickListener(this::onClick);
         Button button_other = findViewById(R.id.button_other);
         button_other.setOnClickListener(this::onClick);
-        textview_ipv4num.setText(SP.getString("ipv4", "192.168.1.0"));
+        textview_ipv4num.setText(SP.getString("ipv4", getString(R.string.ipv4)));
         intent_SendFile = new Intent(this, Send.class);
     }
 
@@ -166,11 +177,8 @@ public class MainActivity extends AppCompatActivity {
 
     void openDocument(String path) {
         Uri uri = Uri.parse("content://com.android.externalstorage.documents/document/primary:" + path);
-        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
-        intent.setType("*/*");//想要展示的文件类型
-//        intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, uri);
-        intent.putExtra (Intent.EXTRA_ALLOW_MULTIPLE, true);
+        Intent intent = new Intent(Intent.ACTION_PICK, uri);
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         intent.setAction(Intent.ACTION_GET_CONTENT);
         startActivityForResult(intent, 1);
     }
@@ -189,7 +197,7 @@ public class MainActivity extends AppCompatActivity {
                     uri = imageNames.getItemAt(i).getUri();
                     path = FileChooseUtil.getPath(this, uri);
                     fileList.add(path);
-                    textview_send.append("@FileMark@"+uri+"@FileMarkEnd@");
+                    textview_send.append("@FileMark@" + uri + "@FileMarkEnd@");
                 }
                 Log.d("fileList", fileList.toString());
             } else {
@@ -197,18 +205,20 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("uri", String.valueOf(uri));
                 FileChooseUtil FileChooseUtil = new FileChooseUtil(this);
                 path = FileChooseUtil.getPath(this, uri);
-                textview_send.append("@FileMark@"+path+"@FileMarkEnd@");
+                textview_send.append("@FileMark@" + path + "@FileMarkEnd@");
                 fileList.add(path);
                 Log.d("fileList", fileList.toString());
             }
+        } else if (data != null) {
+                uri = data.getData();
+                Log.d("uri", String.valueOf(uri));
+                FileChooseUtil FileChooseUtil = new FileChooseUtil(this);
+                path = FileChooseUtil.getPath(this, uri);
+                textview_send.append("@FileMark@"+path+"@FileMarkEnd@");
+                fileList.add(path);
+                Log.d("fileList", fileList.toString());
         } else {
-            uri = data.getData();
-            Log.d("uri", String.valueOf(uri));
-            FileChooseUtil FileChooseUtil = new FileChooseUtil(this);
-            path = FileChooseUtil.getPath(this, uri);
-            textview_send.append("@FileMark@"+path+"@FileMarkEnd@");
-            fileList.add(path);
-            Log.d("fileList", fileList.toString());
+            Toast.makeText(MainActivity.this, "没有选择任何文件", Toast.LENGTH_SHORT).show();
         }
     }
     private void setCustomActionBar() {
@@ -291,31 +301,23 @@ public class MainActivity extends AppCompatActivity {
                 int mark = FileMark.check(send_text);
                 Log.i("mark判定结果", String.valueOf(mark));
                 if (mark == 1) {
-                    // 如果连接已建立则开启文件传送服务
-//                    for (int i=0; i < fileList.size(); i++) {
-//                        Intent intent_connect = new Intent(MainActivity.this, Connect.class);
-//                        Connect.enqueueWork(MainActivity.this, intent_connect);
-//                        ConnectOK(i, fileList);
-
-//                        String fpath = fileList.get(i);
-//                        Log.i("i", String.valueOf(i));
-//                        String name = FileMark.name(fpath);
-//                        send_msg = name;
-                        intent_SendFile.putStringArrayListExtra("path", (ArrayList<String>) fileList);
-                        Send.enqueueWork(MainActivity.this, intent_SendFile);
-                        addMsgList(fileList.toString());
-//                    }
+                    // 如果连接已建立,标志为1,则开启文件传送服务
+                    intent_SendFile.putStringArrayListExtra("path", (ArrayList<String>) fileList);
+                    intent_SendFile.putExtra("position", msgList.size());
+                    Send.enqueueWork(MainActivity.this, intent_SendFile);
+//                    addMsgList(fileList.toString(),1);
+                    textview_send.getText().clear();
                 } else {
-                    // 如果连接已建立则发送字符串
+                    // 如果连接已建立,标志为其他,则发送字符串
                     Connect Connect = new Connect();
                     socket = Connect.getSocket();
                     if (!String.valueOf(socket).equals("null")) {
                         send_msg = send_text;
                         Send.sendM(send_text);
-                        addMsgList(send_msg);
+                        addMsgList(send_msg,0);
                     } else {
-                        Toast.makeText(
-                                MainActivity.this, "当前为离线模式，无法发送", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this,
+                                "当前为离线模式，无法发送", Toast.LENGTH_SHORT).show();
                     }
                 }
 
@@ -349,22 +351,23 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void add_MsgList(Message message) {
+    private void add_MsgList(Message message, int position) {
         if (message.what == 0) {
-            // 把新消息添加进msgList
-            msgList.add(msgList.size(), new Msg((String) message.obj, message.what, time_chat));
-            List<String> content_List2 = msgList.stream().map(Msg::getContent).collect(Collectors.toList());
-            List<Integer> type_List2 = msgList.stream().map(Msg::getType).collect(Collectors.toList());
-            Log.i("MainSR消息列表2", content_List2.toString());
-            Log.i("MainSR类型列表2", type_List2.toString());
-            // msg_adapter通过局部更新方法添加尾项
-            msg_adapter.notifyItemInserted(msg_adapter.getItemCount() - 1);
-            // msgRecyclerView跳转到尾项
-            msgRecyclerView.scrollToPosition(msg_adapter.getItemCount() - 1);
-        } else if (message.what == 2) {
             textview_state0.setText("断开");
             textview_state0.setTextColor(0xffff0000);
             Log.i("网络状态", "断开");
+        } else {
+            // 把新消息添加进msgList
+            msgList.add(msgList.size(), new Msg((String)message.obj, message.what, time_chat, message.arg1, message.arg2));
+            List<String> content_List2 = msgList.stream().map(Msg::getContent).collect(Collectors.toList());
+            List<Integer> type_List2 = msgList.stream().map(Msg::getRSType).collect(Collectors.toList());
+            Log.i("MainSR消息列表2", content_List2.toString());
+            Log.i("MainSR类型列表2", type_List2.toString());
+            // msg_adapter通过局部更新方法添加尾项
+            msg_adapter.notifyItemInserted(position);
+            // msgRecyclerView跳转到尾项
+            msgRecyclerView.scrollToPosition(position);
+            Log.d(Tag+" add_MsgList",msgList.get(position).getFileType()+"");
         }
     }
 
@@ -412,48 +415,22 @@ public class MainActivity extends AppCompatActivity {
         SimpleDateFormat time_format = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault());
         long time_current = System.currentTimeMillis();
         String time_chat = time_format.format(time_current);
-        Msg msg1 = new Msg("欢迎使用玄鸟快传", 0, time_chat);
+        Msg msg1 = new Msg("欢迎使用玄鸟快传", 0, time_chat, 0, 0);
         msgList.add(msg1);
         msg_adapter.setMsgList(msgList);
     }
 
-    void addMsgList(String send_msg) {
+    void addMsgList(String send_msg, int fileType) {
         SimpleDateFormat time_format = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault());
         long time_current = System.currentTimeMillis();
         String time_chat = time_format.format(time_current);
-        msgList.add(new Msg(send_msg, 1,time_chat));         //将输入的消息及其类型添加进消息数据列表中
-        msg_adapter.notifyItemInserted(msgList.size()-1);   //为RecyclerView添加末尾子项
-        msgRecyclerView.scrollToPosition(msgList.size()-1);       //跳转到当前位置
-        textview_send.getText().clear();                            //清空输入框文本
+        msgList.add(new Msg(send_msg, 1, time_chat, fileType, 0)); //将输入的消息及其类型添加进消息数据列表中
+        msg_adapter.notifyItemInserted(msgList.size());                 //为RecyclerView添加末尾子项
+        msgRecyclerView.scrollToPosition(msgList.size()-1);             //跳转到当前位置
+        textview_send.getText().clear();                                //清空输入框文本
         List<String> content_List2 = msgList.stream().map(Msg::getContent).collect(Collectors.toList());
-        List<Integer> type_List2 = msgList.stream().map(Msg::getType).collect(Collectors.toList());
+        List<Integer> type_List2 = msgList.stream().map(Msg::getRSType).collect(Collectors.toList());
         Log.i("MainSR消息列表2", content_List2.toString());
         Log.i("MainSR类型列表2", type_List2.toString());
-    }
-
-    public void ConnectOK(int i, List<String> file_list){
-        handler_connect = new Handler(Looper.myLooper()) {
-            @Override
-            public void handleMessage(Message message) {
-                if (message.what == 1) {
-                    // 如果连接已建立则开启文件传送服务
-                    Connect Connect = new Connect();
-                    Socket socket = Connect.getSocket();
-                    if (!String.valueOf(socket).equals("null")) {
-                        // 发送文件
-                        Intent intent_send = new Intent(MainActivity.this,Send.class);
-                        String path = file_list.get(i);
-                        intent_send.putExtra("path", path);
-                        Send.enqueueWork(MainActivity.this,intent_send);
-                        // 关闭连接
-                        Intent intent_disconnect = new Intent(MainActivity.this,Send.class);
-                        DisConnect.enqueueWork(MainActivity.this,intent_disconnect);
-                    } else {
-                        Toast.makeText(
-                                MainActivity.this, "当前为离线模式，无法发送", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            }
-        };
     }
 }
